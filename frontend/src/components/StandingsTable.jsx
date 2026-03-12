@@ -1,0 +1,138 @@
+import { useState } from 'react'
+import { getPositionColor } from '../utils/colors'
+import { getTeamColor } from '../utils/teams'
+import { formatDriverName } from '../utils/format'
+
+function getVal(row, key) {
+  return key.split('.').reduce((obj, k) => obj?.[k], row)
+}
+
+export default function StandingsTable({ data = [], type = 'driver' }) {
+  const [sortCol, setSortCol] = useState('position')
+  const [sortAsc, setSortAsc] = useState(true)
+
+  const handleSort = (col) => {
+    if (sortCol === col) setSortAsc(!sortAsc)
+    else { setSortCol(col); setSortAsc(true) }
+  }
+
+  const sorted = [...data].sort((a, b) => {
+    const va = getVal(a, sortCol), vb = getVal(b, sortCol)
+    if (typeof va === 'number' && typeof vb === 'number') return sortAsc ? va - vb : vb - va
+    return sortAsc ? String(va ?? '').localeCompare(String(vb ?? '')) : String(vb ?? '').localeCompare(String(va ?? ''))
+  })
+
+  const cols = type === 'driver'
+    ? [
+        { key: 'position', label: 'POS', align: 'left' },
+        { key: 'driver.code', label: 'DRIVER', align: 'left' },
+        { key: 'constructor', label: 'TEAM', align: 'left' },
+        { key: 'points', label: 'PTS', align: 'right' },
+        { key: 'wins', label: 'WINS', align: 'right' },
+      ]
+    : [
+        { key: 'position', label: 'POS', align: 'left' },
+        { key: 'constructor.name', label: 'CONSTRUCTOR', align: 'left' },
+        { key: 'points', label: 'PTS', align: 'right' },
+        { key: 'wins', label: 'WINS', align: 'right' },
+      ]
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b border-f1-border text-f1-muted">
+            {cols.map(c => (
+              <th
+                key={c.key}
+                onClick={() => handleSort(c.key)}
+                className={`py-2 px-3 cursor-pointer hover:text-f1-text select-none text-xs tracking-wider ${
+                  c.align === 'right' ? 'text-right' : 'text-left'
+                }`}
+              >
+                {c.label} {sortCol === c.key ? (sortAsc ? '▲' : '▼') : ''}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {sorted.map((row, i) => {
+            const pos = getVal(row, 'position')
+            const posColor = getPositionColor(pos)
+            const teamName = type === 'driver' ? (row.constructor || '') : (getVal(row, 'constructor.name') || '')
+            const teamColor = getTeamColor(teamName)
+
+            return (
+              <tr
+                key={i}
+                className="border-b border-f1-border/20 hover:bg-white/5 transition-colors team-stripe"
+                style={{ '--stripe-color': teamColor }}
+              >
+                {cols.map(c => {
+                  const val = getVal(row, c.key)
+
+                  if (c.key === 'position') {
+                    return (
+                      <td key={c.key} className="py-2 px-3">
+                        <span
+                          className="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold"
+                          style={posColor ? { backgroundColor: `${posColor}22`, color: posColor } : {}}
+                        >
+                          {val ?? '-'}
+                        </span>
+                      </td>
+                    )
+                  }
+
+                  if (c.key === 'driver.code') {
+                    const code = val || ''
+                    const fullName = getVal(row, 'driver.name') || ''
+                    return (
+                      <td key={c.key} className="py-2 px-3">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-xs font-mono w-8">{code}</span>
+                          <span className="text-f1-muted text-xs">{formatDriverName(code, fullName)}</span>
+                        </div>
+                      </td>
+                    )
+                  }
+
+                  if (c.key === 'constructor' || c.key === 'constructor.name') {
+                    const name = type === 'driver' ? row.constructor : getVal(row, 'constructor.name')
+                    return (
+                      <td key={c.key} className="py-2 px-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: getTeamColor(name) }} />
+                          <span className="text-xs">{name || '-'}</span>
+                        </div>
+                      </td>
+                    )
+                  }
+
+                  if (c.key === 'points') {
+                    return <td key={c.key} className="py-2 px-3 text-right font-mono font-semibold">{val ?? '-'}</td>
+                  }
+
+                  if (c.key === 'wins') {
+                    return (
+                      <td key={c.key} className="py-2 px-3 text-right">
+                        {val > 0 ? (
+                          <span className="inline-flex items-center justify-center min-w-5 h-5 rounded-full bg-f1-red/20 text-f1-red text-xs font-bold px-1.5">{val}</span>
+                        ) : <span className="text-f1-muted text-xs">-</span>}
+                      </td>
+                    )
+                  }
+
+                  return <td key={c.key} className={`py-2 px-3 ${c.align === 'right' ? 'text-right' : ''}`}>{val ?? '-'}</td>
+                })}
+              </tr>
+            )
+          })}
+          {sorted.length === 0 && (
+            <tr><td colSpan={cols.length} className="py-8 text-center text-f1-muted">No standings data</td></tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  )
+}
