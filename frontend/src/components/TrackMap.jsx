@@ -1,20 +1,20 @@
 import Plot from 'react-plotly.js'
 
 const DARK_LAYOUT = {
-  paper_bgcolor: '#1E1E2E',
-  plot_bgcolor: '#1E1E2E',
-  font: { color: '#E0E0E0', size: 11, family: '-apple-system, BlinkMacSystemFont, sans-serif' },
+  paper_bgcolor: 'transparent',
+  plot_bgcolor: 'transparent',
+  font: { color: '#1A1A2E', size: 11, family: '-apple-system, BlinkMacSystemFont, sans-serif' },
   margin: { l: 10, r: 10, t: 30, b: 10 },
   xaxis: { visible: false, scaleanchor: 'y' },
   yaxis: { visible: false },
   showlegend: true,
-  legend: { bgcolor: 'rgba(0,0,0,0)', font: { color: '#E0E0E0', size: 11 } },
+  legend: { bgcolor: 'rgba(0,0,0,0)', font: { color: '#1A1A2E', size: 11 } },
 }
 
 const COLOR_MODES = {
   speed: { label: 'Speed (km/h)', colorscale: 'Plasma' },
   throttle: { label: 'Throttle (%)', colorscale: 'YlOrRd' },
-  brake: { label: 'Brake', colorscale: [[0, '#1E1E2E'], [1, '#ef4444']] },
+  brake: { label: 'Brake', colorscale: [[0, 'transparent'], [1, '#ef4444']] },
   gear: { label: 'Gear', colorscale: 'Viridis' },
 }
 
@@ -89,7 +89,7 @@ export default function TrackMap({ trackData, telemetryData = [], colorMode = 's
       layout={{
         ...DARK_LAYOUT,
         annotations,
-        title: title ? { text: title, font: { size: 13, color: '#E0E0E0' }, x: 0.02, xanchor: 'left' } : '',
+        title: title ? { text: title, font: { size: 13, color: '#1A1A2E' }, x: 0.02, xanchor: 'left' } : '',
       }}
       config={{ responsive: true, displayModeBar: false }}
       style={{ width: '100%', height: '500px' }}

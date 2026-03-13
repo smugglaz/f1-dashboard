@@ -49,10 +49,10 @@ export default function PointsProgression({ year }) {
     const l = {
       paper_bgcolor: 'transparent',
       plot_bgcolor: 'transparent',
-      font: { color: '#E0E0E0', family: 'ui-monospace, monospace', size: 11 },
+      font: { color: '#1A1A2E', family: 'ui-monospace, monospace', size: 11 },
       xaxis: {
         title: { text: 'Round', font: { size: 11 } },
-        gridcolor: '#2A2A3E',
+        gridcolor: '#E2E5EA',
         tickvals: roundNums,
         ticktext: roundNames,
         tickangle: -45,
@@ -60,7 +60,7 @@ export default function PointsProgression({ year }) {
       },
       yaxis: {
         title: { text: 'Points', font: { size: 11 } },
-        gridcolor: '#2A2A3E',
+        gridcolor: '#E2E5EA',
       },
       margin: { t: 10, r: 10, b: 80, l: 50 },
       legend: {

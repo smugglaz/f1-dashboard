@@ -28,5 +28,12 @@ cache/
 Thumbs.db
 nul
 
+# Database WAL files
+*.db-shm
+*.db-wal
+
+# Claude config
+.claude/
+
 # Logs
 *.log

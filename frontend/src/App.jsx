@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Layout from './components/Layout'
 import LoadingSpinner from './components/LoadingSpinner'
 
@@ -17,7 +17,9 @@ function App() {
         <Suspense fallback={<LoadingSpinner />}>
           <Routes>
             <Route path="/" element={<Dashboard />} />
-            <Route path="/history" element={<History />} />
+            <Route path="/race-analysis" element={<History />} />
+            {/* Legacy route redirect */}
+            <Route path="/history" element={<Navigate to="/race-analysis" replace />} />
             <Route path="/race-map" element={<RaceMap />} />
             <Route path="/live" element={<LiveTiming />} />
             <Route path="/predictions" element={<Predictions />} />

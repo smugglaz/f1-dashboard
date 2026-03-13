@@ -47,12 +47,12 @@ export default function TimingTower({ timing = [] }) {
             return (
               <tr
                 key={drv.driver_number || abbr}
-                className="border-b border-f1-border/20 hover:bg-white/5 transition-colors team-stripe"
+                className="border-b border-f1-border/20 hover:bg-black/[0.04] transition-colors team-stripe"
                 style={{ '--stripe-color': teamColor }}
               >
                 <td className="py-1.5 px-2">
                   <span className="inline-flex items-center justify-center w-6 h-6 rounded text-xs font-bold font-mono"
-                    style={posColor ? { color: posColor } : { color: pos <= 10 ? '#e0e0e0' : '#8888AA' }}>
+                    style={posColor ? { color: posColor } : { color: pos <= 10 ? '#1A1A2E' : '#9CA3AF' }}>
                     {pos <= 98 ? pos : '-'}
                   </span>
                 </td>

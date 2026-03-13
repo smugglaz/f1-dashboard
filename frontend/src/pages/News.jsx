@@ -1,7 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useApi } from '../hooks/useApi'
 import NewsCard from '../components/NewsCard'
-import LoadingSpinner from '../components/LoadingSpinner'
+
+import { Skeleton } from '@/components/ui/skeleton'
+import { PageHeader } from '@/components/ui/page-header'
+import { EmptyState } from '@/components/ui/empty-state'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Button } from '@/components/ui/button'
+import { Newspaper } from 'lucide-react'
 
 const SOURCES = ['All', 'formula1.com', 'autosport.com', 'motorsport.com']
 
@@ -24,52 +30,46 @@ export default function News() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold">F1 News</h1>
-          {total != null && (
-            <span className="text-f1-muted text-xs font-mono">{total} articles</span>
-          )}
-        </div>
-        <div className="flex gap-1 bg-f1-card rounded-lg p-1 border border-f1-border">
-          {SOURCES.map(s => (
-            <button
-              key={s}
-              onClick={() => setSource(s === 'All' ? '' : s)}
-              className={`px-3 py-1.5 text-xs rounded-md transition-colors ${
-                (s === 'All' && !source) || s === source
-                  ? 'bg-f1-red text-white'
-                  : 'text-f1-muted hover:text-f1-text'
-              }`}
-            >
-              {s}
-            </button>
+      <PageHeader
+        title="F1 News"
+        subtitle={total != null ? `${total} articles` : undefined}
+      >
+        <Tabs value={source || 'All'} onValueChange={v => setSource(v === 'All' ? '' : v)}>
+          <TabsList>
+            {SOURCES.map(s => (
+              <TabsTrigger key={s} value={s}>{s}</TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+      </PageHeader>
+
+      {loading && page === 1 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="space-y-3">
+              <Skeleton className="h-40 w-full rounded-lg" />
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-3 w-1/2" />
+            </div>
           ))}
         </div>
-      </div>
-
-      {loading && page === 1 ? <LoadingSpinner /> : error ? (
-        <div className="bg-f1-card rounded-lg p-12 border border-f1-border text-center">
-          <div className="text-xl font-semibold mb-2">Unable to load news</div>
-          <div className="text-f1-muted">{error}</div>
-          <button
-            onClick={refetch}
-            className="mt-4 px-4 py-2 bg-f1-red text-white rounded hover:bg-red-700 text-sm"
-          >
-            Retry
-          </button>
-        </div>
+      ) : error ? (
+        <EmptyState
+          icon={Newspaper}
+          title="Unable to load news"
+          description={error}
+          action="Retry"
+          onAction={refetch}
+        />
       ) : articles.length === 0 ? (
-        <div className="bg-f1-card rounded-lg p-12 border border-f1-border text-center">
-          <div className="text-4xl mb-4">📰</div>
-          <div className="text-xl font-semibold mb-2">No Articles Yet</div>
-          <div className="text-f1-muted">
-            {source
-              ? `No articles from ${source}. Try a different source.`
-              : 'News articles will appear after the background fetch completes.'
-            }
-          </div>
-        </div>
+        <EmptyState
+          icon={Newspaper}
+          title="No Articles Yet"
+          description={source
+            ? `No articles from ${source}. Try a different source.`
+            : 'News articles will appear after the background fetch completes.'
+          }
+        />
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -79,24 +79,26 @@ export default function News() {
           </div>
 
           <div className="flex justify-center items-center gap-2">
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="px-4 py-2 text-sm bg-f1-card border border-f1-border rounded disabled:opacity-30 hover:bg-white/5"
             >
               Previous
-            </button>
+            </Button>
             <span className="px-4 py-2 text-sm text-f1-muted font-mono">
               Page {page}
               {total != null && ` of ${Math.ceil(total / 20)}`}
             </span>
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => setPage(p => p + 1)}
               disabled={articles.length < 20}
-              className="px-4 py-2 text-sm bg-f1-card border border-f1-border rounded disabled:opacity-30 hover:bg-white/5"
             >
               Next
-            </button>
+            </Button>
           </div>
         </>
       )}

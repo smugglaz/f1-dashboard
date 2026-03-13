@@ -1,15 +1,15 @@
 import Plot from 'react-plotly.js'
 
 const DARK_LAYOUT = {
-  paper_bgcolor: '#1E1E2E',
-  plot_bgcolor: '#1E1E2E',
-  font: { color: '#E0E0E0', size: 11, family: '-apple-system, BlinkMacSystemFont, sans-serif' },
+  paper_bgcolor: 'transparent',
+  plot_bgcolor: 'transparent',
+  font: { color: '#1A1A2E', size: 11, family: '-apple-system, BlinkMacSystemFont, sans-serif' },
   margin: { l: 55, r: 20, t: 10, b: 40 },
   legend: { bgcolor: 'rgba(0,0,0,0)', font: { size: 11 } },
   xaxis: {
-    title: { text: 'Distance (m)', font: { size: 10, color: '#8888AA' } },
-    gridcolor: '#1E1E2E',
-    color: '#8888AA',
+    title: { text: 'Distance (m)', font: { size: 10, color: '#6B7280' } },
+    gridcolor: '#E2E5EA',
+    color: '#6B7280',
     zeroline: false,
   },
 }
@@ -39,9 +39,9 @@ export default function TelemetryChart({ drivers = [] }) {
       layout={{
         ...DARK_LAYOUT,
         yaxis: {
-          title: { text: 'Speed (km/h)', font: { size: 10, color: '#8888AA' } },
-          gridcolor: '#2A2A3E',
-          color: '#8888AA',
+          title: { text: 'Speed (km/h)', font: { size: 10, color: '#6B7280' } },
+          gridcolor: '#E2E5EA',
+          color: '#6B7280',
           zeroline: false,
         },
         height: 300,

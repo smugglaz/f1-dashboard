@@ -52,21 +52,21 @@ export function formatDriverName(code, fullName) {
  * Returns { text: '▲3', color: '#4ade80', delta: 3 } or similar.
  */
 export function formatPositionChange(grid, finish) {
-  if (!grid || !finish || grid === 0) return { text: '', color: '#8888AA', delta: 0 }
+  if (!grid || !finish || grid === 0) return { text: '', color: '#9CA3AF', delta: 0 }
   const g = parseInt(grid)
   const f = parseInt(finish)
-  if (isNaN(g) || isNaN(f)) return { text: '', color: '#8888AA', delta: 0 }
+  if (isNaN(g) || isNaN(f)) return { text: '', color: '#9CA3AF', delta: 0 }
   const delta = g - f // positive = gained positions
   if (delta > 0) return { text: `▲${delta}`, color: '#4ade80', delta }
   if (delta < 0) return { text: `▼${Math.abs(delta)}`, color: '#ef4444', delta }
-  return { text: '—', color: '#8888AA', delta: 0 }
+  return { text: '—', color: '#9CA3AF', delta: 0 }
 }
 
 /**
  * Format race result status with semantic color.
  */
 export function formatStatus(status, position) {
-  if (!status) return { label: '-', color: '#8888AA' }
+  if (!status) return { label: '-', color: '#9CA3AF' }
   const s = String(status)
   if (s === 'Finished' || s.startsWith('+')) {
     if (position === 1) return { label: 'P1', color: '#FFD700' }
@@ -85,9 +85,9 @@ export function formatStatus(status, position) {
  * Green: <25s, Yellow: 25-30s, Red: >30s
  */
 export function formatPitDuration(seconds) {
-  if (!seconds && seconds !== 0) return { text: '-', color: '#8888AA' }
+  if (!seconds && seconds !== 0) return { text: '-', color: '#9CA3AF' }
   const s = parseFloat(seconds)
-  if (isNaN(s)) return { text: String(seconds), color: '#8888AA' }
+  if (isNaN(s)) return { text: String(seconds), color: '#9CA3AF' }
   const color = s < 25 ? '#4ade80' : s < 30 ? '#eab308' : '#ef4444'
   return { text: `${s.toFixed(1)}s`, color }
 }
@@ -168,7 +168,7 @@ export function qualTimeToMs(timeStr) {
  * Green: <0.3%, Yellow: 0.3-1.0%, Red: >1.0%
  */
 export function formatPercentDelta(pct) {
-  if (pct === null || pct === undefined || isNaN(pct)) return { text: '-', color: '#8888AA' }
+  if (pct === null || pct === undefined || isNaN(pct)) return { text: '-', color: '#9CA3AF' }
   const abs = Math.abs(pct)
   const color = abs < 0.3 ? '#4ade80' : abs < 1.0 ? '#eab308' : '#ef4444'
   const sign = pct > 0 ? '+' : ''

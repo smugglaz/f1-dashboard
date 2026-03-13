@@ -1,15 +1,16 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { getPositionColor } from '../utils/colors'
 import { getTeamColor } from '../utils/teams'
 import { formatDriverName } from '../utils/format'
+import { GapBar } from '@/components/ui/gap-bar'
 
 function getVal(row, key) {
   return key.split('.').reduce((obj, k) => obj?.[k], row)
 }
 
 export default function StandingsTable({ data = [], type = 'driver' }) {
-  const [sortCol, setSortCol] = useState('position')
-  const [sortAsc, setSortAsc] = useState(true)
+  const [sortCol, setSortCol] = useState('points')
+  const [sortAsc, setSortAsc] = useState(false)
 
   const handleSort = (col) => {
     if (sortCol === col) setSortAsc(!sortAsc)
@@ -22,18 +23,24 @@ export default function StandingsTable({ data = [], type = 'driver' }) {
     return sortAsc ? String(va ?? '').localeCompare(String(vb ?? '')) : String(vb ?? '').localeCompare(String(va ?? ''))
   })
 
+  const maxPoints = useMemo(() => {
+    return Math.max(1, ...data.map(r => getVal(r, 'points') || 0))
+  }, [data])
+
   const cols = type === 'driver'
     ? [
         { key: 'position', label: 'POS', align: 'left' },
         { key: 'driver.code', label: 'DRIVER', align: 'left' },
         { key: 'constructor', label: 'TEAM', align: 'left' },
         { key: 'points', label: 'PTS', align: 'right' },
+        { key: 'gap', label: 'GAP', align: 'left' },
         { key: 'wins', label: 'WINS', align: 'right' },
       ]
     : [
         { key: 'position', label: 'POS', align: 'left' },
         { key: 'constructor.name', label: 'CONSTRUCTOR', align: 'left' },
         { key: 'points', label: 'PTS', align: 'right' },
+        { key: 'gap', label: 'GAP', align: 'left' },
         { key: 'wins', label: 'WINS', align: 'right' },
       ]
 
@@ -65,7 +72,7 @@ export default function StandingsTable({ data = [], type = 'driver' }) {
             return (
               <tr
                 key={i}
-                className="border-b border-f1-border/20 hover:bg-white/5 transition-colors team-stripe"
+                className="border-b border-f1-border/20 hover:bg-black/[0.04] transition-colors team-stripe"
                 style={{ '--stripe-color': teamColor }}
               >
                 {cols.map(c => {
@@ -111,6 +118,15 @@ export default function StandingsTable({ data = [], type = 'driver' }) {
 
                   if (c.key === 'points') {
                     return <td key={c.key} className="py-2 px-3 text-right font-mono font-semibold">{val ?? '-'}</td>
+                  }
+
+                  if (c.key === 'gap') {
+                    const pts = getVal(row, 'points') || 0
+                    return (
+                      <td key={c.key} className="py-2 px-3 w-28">
+                        <GapBar value={pts} maxValue={maxPoints} color={teamColor} />
+                      </td>
+                    )
                   }
 
                   if (c.key === 'wins') {

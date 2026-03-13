@@ -4,7 +4,7 @@ import LoadingSpinner from './LoadingSpinner'
 
 function Stat({ label, value, highlight = false }) {
   return (
-    <div className="bg-f1-dark rounded px-2.5 py-1.5 text-center min-w-[70px]">
+    <div className="bg-f1-border/50 rounded px-2.5 py-1.5 text-center min-w-[70px]">
       <div className="text-[10px] text-f1-muted uppercase tracking-wider">{label}</div>
       <div className={`text-sm font-mono font-bold ${highlight ? 'text-yellow-400' : ''}`}>
         {value ?? '-'}

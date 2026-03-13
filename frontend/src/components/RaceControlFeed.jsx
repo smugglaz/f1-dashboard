@@ -7,7 +7,7 @@ const FLAG_STYLES = {
   YELLOW: { bg: '', border: 'border-l-yellow-400', text: 'text-yellow-400' },
   GREEN: { bg: '', border: 'border-l-green-400', text: 'text-green-400' },
   BLUE: { bg: '', border: 'border-l-blue-400', text: 'text-blue-400' },
-  CHEQUERED: { bg: 'bg-white/5', border: 'border-l-white', text: 'text-white font-bold' },
+  CHEQUERED: { bg: 'bg-black/[0.03]', border: 'border-l-white', text: 'text-white font-bold' },
   BLACK: { bg: '', border: 'border-l-gray-500', text: 'text-gray-400' },
   'BLACK AND WHITE': { bg: '', border: 'border-l-gray-300', text: 'text-gray-300' },
   'BLACK AND ORANGE': { bg: '', border: 'border-l-orange-400', text: 'text-orange-400' },

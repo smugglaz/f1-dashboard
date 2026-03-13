@@ -12,7 +12,7 @@ function H2HBar({ leftVal, rightVal, leftCode, rightCode, label }) {
         <span className={`w-8 text-right ${leftVal > rightVal ? 'text-green-400 font-bold' : 'text-f1-muted'}`}>
           {leftVal}
         </span>
-        <div className="flex-1 h-4 bg-f1-dark rounded-sm overflow-hidden flex">
+        <div className="flex-1 h-4 bg-f1-border/50 rounded-sm overflow-hidden flex">
           <div
             className="h-full transition-all duration-500"
             style={{ width: `${leftPct}%`, backgroundColor: leftVal >= rightVal ? '#4ade80' : '#ef4444', opacity: 0.7 }}

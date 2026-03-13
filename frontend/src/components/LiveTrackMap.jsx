@@ -23,7 +23,7 @@ export default function LiveTrackMap({ trackData, positions = [] }) {
       y: positions.map(p => p.y),
       text: positions.map(p => p.abbreviation || p.driver_number || ''),
       textposition: 'top center',
-      textfont: { color: '#E0E0E0', size: 9, family: 'monospace' },
+      textfont: { color: '#1A1A2E', size: 9, family: 'monospace' },
       marker: {
         size: 10,
         color: positions.map(p => {
@@ -43,8 +43,8 @@ export default function LiveTrackMap({ trackData, positions = [] }) {
       <Plot
         data={traces}
         layout={{
-          paper_bgcolor: '#1E1E2E',
-          plot_bgcolor: '#1E1E2E',
+          paper_bgcolor: 'transparent',
+          plot_bgcolor: 'transparent',
           margin: { l: 5, r: 5, t: 5, b: 5 },
           xaxis: { visible: false, scaleanchor: 'y' },
           yaxis: { visible: false },

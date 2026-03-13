@@ -3,8 +3,12 @@ import { useApi, fetchApi } from '../hooks/useApi'
 import TrackMap from '../components/TrackMap'
 import TelemetryChart from '../components/TelemetryChart'
 import LapComparison from '../components/LapComparison'
-import LoadingSpinner from '../components/LoadingSpinner'
 import { getTeamColor } from '../utils/teams'
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
+import { PageHeader } from '@/components/ui/page-header'
+import { MapPin, Activity, TrendingDown } from 'lucide-react'
 
 const SESSIONS = ['R', 'Q', 'FP3', 'FP2', 'FP1']
 
@@ -50,7 +54,6 @@ export default function RaceMap() {
 
   const yearList = Array.from({ length: currentYear - 2017 }, (_, i) => currentYear - i)
 
-  // Build title from selected race
   const selectedRace = races.find(r => r.round === round)
   const circuitTitle = selectedRace
     ? `${selectedRace.circuit?.name || selectedRace.name} — ${year} ${session}`
@@ -58,8 +61,7 @@ export default function RaceMap() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <h1 className="text-2xl font-bold">Track Map & Telemetry</h1>
+      <PageHeader title="Track Map & Telemetry" subtitle={circuitTitle || undefined}>
         <div className="flex gap-2">
           <select value={year} onChange={e => setYear(Number(e.target.value))}
             className="bg-f1-card border border-f1-border rounded px-3 py-1.5 text-sm">
@@ -76,9 +78,9 @@ export default function RaceMap() {
             {SESSIONS.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
-      </div>
+      </PageHeader>
 
-      {/* Driver selector — team color dots + abbreviation */}
+      {/* Driver selector */}
       <div className="flex flex-wrap gap-2">
         {driverColors.map(d => {
           const isSelected = selectedDrivers.includes(d.abbreviation)
@@ -108,43 +110,64 @@ export default function RaceMap() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        <div className="bg-f1-card rounded-lg p-4 border border-f1-border">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-lg font-semibold">Circuit Map</h2>
-            <select value={colorMode} onChange={e => setColorMode(e.target.value)}
-              className="bg-f1-dark border border-f1-border rounded px-2 py-1 text-xs">
-              <option value="speed">🏎 Speed</option>
-              <option value="throttle">⚡ Throttle</option>
-              <option value="brake">🔴 Brake</option>
-              <option value="gear">⚙ Gear</option>
-            </select>
-          </div>
-          {loadingCircuit ? <LoadingSpinner /> : (
-            <TrackMap
-              trackData={circuit?.track}
-              telemetryData={telemetryData}
-              colorMode={colorMode}
-              corners={circuit?.corners || []}
-              title={circuitTitle}
-            />
-          )}
-        </div>
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <MapPin className="h-3.5 w-3.5 text-f1-muted" />
+                Circuit Map
+              </CardTitle>
+              <select value={colorMode} onChange={e => setColorMode(e.target.value)}
+                className="bg-white border border-f1-border rounded px-2 py-1 text-xs">
+                <option value="speed">Speed</option>
+                <option value="throttle">Throttle</option>
+                <option value="brake">Brake</option>
+                <option value="gear">Gear</option>
+              </select>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {loadingCircuit ? <Skeleton className="h-80 w-full" /> : (
+              <TrackMap
+                trackData={circuit?.track}
+                telemetryData={telemetryData}
+                colorMode={colorMode}
+                corners={circuit?.corners || []}
+                title={circuitTitle}
+              />
+            )}
+          </CardContent>
+        </Card>
 
         <div className="space-y-4">
-          <div className="bg-f1-card rounded-lg p-4 border border-f1-border">
-            <h2 className="text-lg font-semibold mb-2">Speed Trace</h2>
-            {loadingTel ? <LoadingSpinner /> : <TelemetryChart drivers={telemetryData} />}
-          </div>
-          <div className="bg-f1-card rounded-lg p-4 border border-f1-border">
-            <h2 className="text-lg font-semibold mb-2">Lap Delta</h2>
-            {loadingTel ? <LoadingSpinner /> : <LapComparison drivers={telemetryData} />}
-          </div>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Activity className="h-3.5 w-3.5 text-f1-muted" />
+                Speed Trace
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loadingTel ? <Skeleton className="h-48 w-full" /> : <TelemetryChart drivers={telemetryData} />}
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <TrendingDown className="h-3.5 w-3.5 text-f1-muted" />
+                Lap Delta
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loadingTel ? <Skeleton className="h-48 w-full" /> : <LapComparison drivers={telemetryData} />}
+            </CardContent>
+          </Card>
         </div>
       </div>
 
-      <div className="text-f1-muted text-xs text-center">
+      <p className="text-f1-muted text-xs text-center">
         Telemetry data provided by FastF1. Data availability depends on session type and year.
-      </div>
+      </p>
     </div>
   )
 }

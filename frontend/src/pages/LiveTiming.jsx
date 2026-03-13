@@ -5,7 +5,14 @@ import TimingTower from '../components/TimingTower'
 import WeatherWidget from '../components/WeatherWidget'
 import RaceControlFeed from '../components/RaceControlFeed'
 import LiveTrackMap from '../components/LiveTrackMap'
-import LoadingSpinner from '../components/LoadingSpinner'
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
+import { PageHeader } from '@/components/ui/page-header'
+import { EmptyState } from '@/components/ui/empty-state'
+import { Button } from '@/components/ui/button'
+import { Flag, Cloud, Radio, Map, Timer } from 'lucide-react'
 
 const SESSION_LABELS = {
   'Practice 1': 'FP1', 'Practice 2': 'FP2', 'Practice 3': 'FP3',
@@ -21,11 +28,9 @@ export default function LiveTiming() {
 
   const [timing, setTiming] = useState([])
 
-  // useWebSocket expects just the path — it prepends protocol+host internally
   const { data: wsData, status: wsStatus } = useWebSocket('/ws/live-timing')
   const wsConnected = wsStatus === 'connected'
 
-  // Merge WebSocket timing updates into state
   useEffect(() => {
     if (wsData?.timing) {
       setTiming(prev => {
@@ -38,13 +43,11 @@ export default function LiveTiming() {
     }
   }, [wsData])
 
-  // Use REST timing as initial data
   useEffect(() => {
     const restArr = restTiming?.timing || (Array.isArray(restTiming) ? restTiming : [])
     if (restArr.length && !timing.length) setTiming(restArr)
   }, [restTiming])
 
-  // Periodically refresh weather + race control via REST
   useEffect(() => {
     const id = setInterval(() => {
       refetchWeather()
@@ -55,12 +58,21 @@ export default function LiveTiming() {
 
   const isActive = sessionInfo && sessionInfo.status !== 'no_active_session'
 
-  if (loadingSession) return <LoadingSpinner />
+  if (loadingSession) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-10 w-64" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <Skeleton className="h-40" />
+          <Skeleton className="h-40 lg:col-span-2" />
+        </div>
+        <Skeleton className="h-96" />
+      </div>
+    )
+  }
 
-  // Extract nested arrays from API responses
   const rcMessages = raceControl?.messages || (Array.isArray(raceControl) ? raceControl : [])
 
-  // Build position data for LiveTrackMap from timing entries
   const positions = timing
     .filter(d => d.x != null && d.y != null)
     .map(d => ({
@@ -71,86 +83,95 @@ export default function LiveTiming() {
       y: d.y,
     }))
 
-  // Session type badge
   const sessionLabel = sessionInfo?.session_name
     ? SESSION_LABELS[sessionInfo.session_name] || sessionInfo.session_name
     : ''
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold">Live Timing</h1>
-            {isActive && sessionLabel && (
-              <span className="px-2 py-0.5 text-[10px] font-bold bg-f1-red/20 text-f1-red rounded uppercase tracking-wider">
-                {sessionLabel}
-              </span>
-            )}
-          </div>
-          {isActive && (
-            <div className="text-f1-muted text-sm mt-1">
-              {sessionInfo.session_name} &middot; {sessionInfo.circuit} {sessionInfo.country}
-            </div>
-          )}
-        </div>
+      <PageHeader
+        title="Live Timing"
+        subtitle={isActive ? `${sessionInfo.session_name} — ${sessionInfo.circuit} ${sessionInfo.country}` : undefined}
+      >
         <div className="flex items-center gap-3">
+          {isActive && sessionLabel && (
+            <Badge variant="destructive" className="uppercase tracking-wider text-[10px]">
+              {sessionLabel}
+            </Badge>
+          )}
           <div className={`flex items-center gap-1.5 text-xs ${wsConnected ? 'text-green-400' : 'text-f1-muted'}`}>
             <div className={`w-2 h-2 rounded-full ${wsConnected ? 'bg-green-400 animate-pulse-dot' : 'bg-gray-500'}`} />
             {wsConnected ? 'LIVE' : wsStatus === 'reconnecting' ? 'RECONNECTING' : 'DISCONNECTED'}
           </div>
-          <button
-            onClick={refetchSession}
-            className="px-3 py-1.5 text-xs bg-f1-card border border-f1-border rounded hover:bg-white/5"
-          >
+          <Button variant="outline" size="sm" onClick={refetchSession}>
             Refresh
-          </button>
+          </Button>
         </div>
-      </div>
+      </PageHeader>
 
       {!isActive ? (
-        <div className="bg-f1-card rounded-lg p-12 border border-f1-border text-center">
-          <div className="text-4xl mb-4">🏁</div>
-          <div className="text-xl font-semibold mb-2">No Active Session</div>
-          <div className="text-f1-muted">
-            Live timing will appear here during practice, qualifying, and race sessions.
-          </div>
-          <button
-            onClick={refetchSession}
-            className="mt-4 px-4 py-2 bg-f1-red text-white rounded hover:bg-red-700 text-sm"
-          >
-            Check Again
-          </button>
-        </div>
+        <EmptyState
+          icon={Flag}
+          title="No Active Session"
+          description="Live timing will appear here during practice, qualifying, and race sessions."
+          action="Check Again"
+          onAction={refetchSession}
+        />
       ) : (
         <>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="bg-f1-card rounded-lg p-4 border border-f1-border">
-              <h2 className="text-sm font-semibold text-f1-muted mb-3">WEATHER</h2>
-              <WeatherWidget weather={weather} />
-            </div>
-            <div className="lg:col-span-2 bg-f1-card rounded-lg p-4 border border-f1-border">
-              <h2 className="text-sm font-semibold text-f1-muted mb-3">RACE CONTROL</h2>
-              <RaceControlFeed messages={rcMessages} />
-            </div>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Cloud className="h-3.5 w-3.5 text-f1-muted" />
+                  Weather
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <WeatherWidget weather={weather} />
+              </CardContent>
+            </Card>
+            <Card className="lg:col-span-2">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Radio className="h-3.5 w-3.5 text-f1-muted" />
+                  Race Control
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <RaceControlFeed messages={rcMessages} />
+              </CardContent>
+            </Card>
           </div>
 
           <div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
-            <div className="xl:col-span-3 bg-f1-card rounded-lg p-4 border border-f1-border">
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-sm font-semibold text-f1-muted">TIMING TOWER</h2>
-                {timing.length > 0 && (
-                  <span className="text-[10px] text-f1-muted font-mono">
-                    {timing.length} drivers
-                  </span>
-                )}
-              </div>
-              <TimingTower timing={timing} />
-            </div>
-            <div className="bg-f1-card rounded-lg p-4 border border-f1-border">
-              <h2 className="text-sm font-semibold text-f1-muted mb-3">TRACK MAP</h2>
-              <LiveTrackMap positions={positions} />
-            </div>
+            <Card className="xl:col-span-3">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Timer className="h-3.5 w-3.5 text-f1-muted" />
+                  Timing Tower
+                  {timing.length > 0 && (
+                    <span className="text-[10px] text-f1-muted font-mono font-normal ml-auto">
+                      {timing.length} drivers
+                    </span>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <TimingTower timing={timing} />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Map className="h-3.5 w-3.5 text-f1-muted" />
+                  Track Map
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <LiveTrackMap positions={positions} />
+              </CardContent>
+            </Card>
           </div>
         </>
       )}

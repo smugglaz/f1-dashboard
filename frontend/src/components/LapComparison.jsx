@@ -26,18 +26,18 @@ export default function LapComparison({ drivers = [] }) {
       <Plot
         data={traces}
         layout={{
-          paper_bgcolor: '#1E1E2E',
-          plot_bgcolor: '#1E1E2E',
-          font: { color: '#E0E0E0', size: 11, family: '-apple-system, BlinkMacSystemFont, sans-serif' },
+          paper_bgcolor: 'transparent',
+          plot_bgcolor: 'transparent',
+          font: { color: '#1A1A2E', size: 11, family: '-apple-system, BlinkMacSystemFont, sans-serif' },
           margin: { l: 55, r: 20, t: 10, b: 40 },
           xaxis: {
-            title: { text: 'Distance (m)', font: { size: 10, color: '#8888AA' } },
-            gridcolor: '#2A2A3E',
+            title: { text: 'Distance (m)', font: { size: 10, color: '#6B7280' } },
+            gridcolor: '#E2E5EA',
             zeroline: false,
           },
           yaxis: {
-            title: { text: 'Delta (s)', font: { size: 10, color: '#8888AA' } },
-            gridcolor: '#2A2A3E',
+            title: { text: 'Delta (s)', font: { size: 10, color: '#6B7280' } },
+            gridcolor: '#E2E5EA',
             zeroline: true,
             zerolinecolor: '#E10600',
             zerolinewidth: 1.5,

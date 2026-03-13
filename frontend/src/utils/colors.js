@@ -44,7 +44,7 @@ export const STATUS_COLORS = {
 }
 
 export function getStatusColor(status) {
-  if (!status) return '#e0e0e0'
+  if (!status) return '#6B7280'
   // Direct match
   if (STATUS_COLORS[status]) return STATUS_COLORS[status]
   // Partial match for statuses like "Engine", "Collision", "Gearbox"
@@ -59,7 +59,7 @@ export function getStatusColor(status) {
 export const TIRE_COLORS = {
   SOFT: '#ef4444',
   MEDIUM: '#eab308',
-  HARD: '#f5f5f5',
+  HARD: '#9CA3AF',
   INTERMEDIATE: '#22c55e',
   WET: '#3b82f6',
 }
@@ -71,12 +71,12 @@ export function getTireColor(compound) {
 
 export const F1_COLORS = {
   red: '#E10600',
-  dark: '#15151E',
-  card: '#1E1E2E',
-  border: '#2A2A3E',
-  text: '#E0E0E0',
-  muted: '#8888AA',
-  green: '#00D2BE',
-  yellow: '#FDD835',
-  purple: '#AB47BC',
+  dark: '#F4F5F7',
+  card: '#FFFFFF',
+  border: '#E2E5EA',
+  text: '#1A1A2E',
+  muted: '#6B7280',
+  green: '#059669',
+  yellow: '#D97706',
+  purple: '#7C3AED',
 }
