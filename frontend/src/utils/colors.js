@@ -71,12 +71,48 @@ export function getTireColor(compound) {
 
 export const F1_COLORS = {
   red: '#E10600',
-  dark: '#F4F5F7',
-  card: '#FFFFFF',
-  border: '#E2E5EA',
-  text: '#1A1A2E',
-  muted: '#6B7280',
+  dark: '#faf9f6',
+  card: 'rgba(255, 255, 255, 0.72)',
+  border: 'rgba(0, 0, 0, 0.06)',
+  text: '#1d1d1f',
+  muted: '#86868b',
   green: '#059669',
   yellow: '#D97706',
   purple: '#7C3AED',
+}
+
+// Liquid Glass palette for Plotly/Recharts (they need JS values, not CSS vars)
+export const GLASS_COLORS = {
+  // Canvas
+  canvasStart: '#faf9f6',
+  canvasEnd: '#ecedf0',
+  // Glass surfaces
+  glassBg: 'rgba(255, 255, 255, 0.72)',
+  glassBgHeavy: 'rgba(255, 255, 255, 0.88)',
+  glassBorder: 'rgba(0, 0, 0, 0.06)',
+  glassHighlight: 'rgba(255, 255, 255, 0.5)',
+  // Apple label hierarchy
+  labelPrimary: '#1d1d1f',
+  labelSecondary: '#86868b',
+  labelTertiary: '#aeaeb2',
+  labelQuaternary: '#c7c7cc',
+  // Chart grid & axes
+  gridLine: 'rgba(0, 0, 0, 0.06)',
+  axisLine: '#aeaeb2',
+  axisText: '#86868b',
+  // Chart-friendly accent series
+  series: [
+    '#E10600', // F1 red
+    '#007AFF', // Apple blue
+    '#34C759', // Apple green
+    '#FF9500', // Apple orange
+    '#AF52DE', // Apple purple
+    '#FF2D55', // Apple pink
+    '#5AC8FA', // Apple cyan
+    '#FFCC00', // Apple yellow
+  ],
+  // Transparent bg for chart containers
+  transparent: 'rgba(0,0,0,0)',
+  paperBg: 'rgba(0,0,0,0)',
+  plotBg: 'rgba(0,0,0,0)',
 }

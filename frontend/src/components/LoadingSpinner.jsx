@@ -2,15 +2,15 @@ export default function LoadingSpinner({ compact = false }) {
   if (compact) {
     return (
       <div className="flex items-center justify-center py-4">
-        <div className="w-5 h-5 border-2 border-f1-border border-t-f1-red rounded-full animate-spin" />
+        <div className="w-5 h-5 border-2 border-glass-border border-t-f1-red rounded-full animate-spin" />
       </div>
     )
   }
 
   return (
     <div className="flex flex-col items-center justify-center h-64 gap-3">
-      <div className="w-10 h-10 border-4 border-f1-border border-t-f1-red rounded-full animate-spin" />
-      <span className="text-f1-muted text-xs animate-pulse">Loading data...</span>
+      <div className="w-10 h-10 border-4 border-glass-border border-t-f1-red rounded-full animate-spin" />
+      <span className="text-label-tertiary text-xs animate-pulse">Loading data...</span>
     </div>
   )
 }

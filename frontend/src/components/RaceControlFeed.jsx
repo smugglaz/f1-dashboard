@@ -13,10 +13,10 @@ const FLAG_STYLES = {
   'BLACK AND ORANGE': { bg: '', border: 'border-l-orange-400', text: 'text-orange-400' },
 }
 
-const DEFAULT_STYLE = { bg: '', border: 'border-l-transparent', text: 'text-f1-text' }
+const DEFAULT_STYLE = { bg: '', border: 'border-l-transparent', text: 'text-label-primary' }
 
 export default function RaceControlFeed({ messages = [] }) {
-  if (!messages.length) return <div className="text-f1-muted text-sm text-center py-4">No race control messages</div>
+  if (!messages.length) return <div className="text-label-tertiary text-sm text-center py-4">No race control messages</div>
 
   return (
     <div className="space-y-0.5 max-h-64 overflow-y-auto">
@@ -29,7 +29,7 @@ export default function RaceControlFeed({ messages = [] }) {
             key={i}
             className={`flex gap-2 text-sm py-1.5 px-2 border-l-2 rounded-r-sm ${style.bg} ${style.border} ${i === 0 ? 'animate-fade-in' : ''}`}
           >
-            <span className="text-f1-muted text-[10px] font-mono whitespace-nowrap shrink-0">
+            <span className="text-label-tertiary text-[10px] font-mono whitespace-nowrap shrink-0">
               {msg.date ? timeAgo(msg.date) : ''}
             </span>
             <span className={`${style.text} ${isHighPriority ? 'text-xs' : 'text-xs'}`}>

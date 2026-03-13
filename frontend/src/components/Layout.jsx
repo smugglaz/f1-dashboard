@@ -2,13 +2,28 @@ import { NavLink } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { LayoutDashboard, History, Map, Radio, Brain, Newspaper, Menu, X } from 'lucide-react'
 
-const navItems = [
-  { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/race-analysis', icon: History, label: 'Race Analysis' },
-  { to: '/race-map', icon: Map, label: 'Track Map' },
-  { to: '/live', icon: Radio, label: 'Live Timing', liveIndicator: true },
-  { to: '/predictions', icon: Brain, label: 'Predictions' },
-  { to: '/news', icon: Newspaper, label: 'News' },
+const navGroups = [
+  {
+    label: 'Analysis',
+    items: [
+      { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
+      { to: '/race-analysis', icon: History, label: 'Race Story' },
+    ],
+  },
+  {
+    label: 'Live',
+    items: [
+      { to: '/race-map', icon: Map, label: 'Track Map' },
+      { to: '/live', icon: Radio, label: 'Live Timing', liveIndicator: true },
+    ],
+  },
+  {
+    label: 'Intel',
+    items: [
+      { to: '/predictions', icon: Brain, label: 'Predictions' },
+      { to: '/news', icon: Newspaper, label: 'News' },
+    ],
+  },
 ]
 
 export default function Layout({ children }) {
@@ -27,78 +42,91 @@ export default function Layout({ children }) {
     return () => clearInterval(id)
   }, [])
 
-  // Close sidebar on route change (mobile)
   const closeSidebar = () => setSidebarOpen(false)
 
   return (
-    <div className="flex min-h-screen bg-f1-dark">
+    <div className="flex min-h-screen">
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/30 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden"
           onClick={closeSidebar}
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar — fixed glass panel */}
       <nav
-        className={`fixed lg:static inset-y-0 left-0 z-50 w-56 bg-white border-r border-f1-border flex flex-col shrink-0 shadow-sm transition-transform duration-200 ease-in-out ${
+        className={`fixed inset-y-0 left-0 z-50 w-56 glass-heavy flex flex-col shrink-0 transition-transform duration-200 ease-in-out ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
-        <div className="p-4 border-b border-f1-border flex items-center justify-between">
-          <h1 className="text-xl font-bold">
-            <span className="text-f1-red">F1</span> Dashboard
+        {/* Logo */}
+        <div className="px-5 pt-6 pb-4 flex items-center justify-between">
+          <h1 className="text-title-3 font-bold tracking-tight text-label-primary">
+            F1
           </h1>
           <button
             onClick={closeSidebar}
-            className="lg:hidden text-f1-muted hover:text-f1-text"
+            className="lg:hidden text-label-tertiary hover:text-label-primary transition-colors"
           >
             <X size={18} />
           </button>
         </div>
-        <div className="flex-1 py-2">
-          {navItems.map(({ to, icon: Icon, label, liveIndicator }) => (
-            <NavLink
-              key={to}
-              to={to}
-              onClick={closeSidebar}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-3 text-sm transition-colors ${
-                  isActive
-                    ? 'bg-f1-red/10 text-f1-red border-r-2 border-f1-red'
-                    : 'text-f1-muted hover:text-f1-text hover:bg-f1-border/20'
-                }`
-              }
-            >
-              <Icon size={18} />
-              <span className="flex-1">{label}</span>
-              {liveIndicator && liveActive && (
-                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse-dot" title="Live session active" />
-              )}
-            </NavLink>
+
+        {/* Nav groups */}
+        <div className="flex-1 px-3 overflow-y-auto">
+          {navGroups.map((group) => (
+            <div key={group.label} className="mb-4">
+              <div className="px-2 mb-1 text-caption-2 uppercase tracking-wider font-medium">
+                {group.label}
+              </div>
+              {group.items.map(({ to, icon: Icon, label, liveIndicator }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  onClick={closeSidebar}
+                  className={({ isActive }) =>
+                    `flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm transition-all ${
+                      isActive
+                        ? 'bg-black/[0.06] text-label-primary font-medium'
+                        : 'text-label-secondary hover:text-label-primary hover:bg-black/[0.03]'
+                    }`
+                  }
+                >
+                  <Icon size={17} strokeWidth={1.8} />
+                  <span className="flex-1">{label}</span>
+                  {liveIndicator && liveActive && (
+                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse-dot" title="Live session active" />
+                  )}
+                </NavLink>
+              ))}
+            </div>
           ))}
         </div>
-        <div className="p-4 border-t border-f1-border text-xs text-f1-muted">
-          F1 Analytics v2.0
+
+        {/* Footer */}
+        <div className="px-5 py-4 text-caption-2">
+          F1 Analytics
         </div>
       </nav>
 
-      {/* Main content */}
-      <main className="flex-1 overflow-auto">
+      {/* Main content — offset by sidebar width */}
+      <main className="flex-1 lg:ml-56 overflow-auto">
         {/* Mobile header */}
-        <div className="lg:hidden sticky top-0 z-30 bg-white border-b border-f1-border px-4 py-3 flex items-center gap-3 shadow-sm">
+        <div className="lg:hidden sticky top-0 z-30 glass-heavy px-4 py-3 flex items-center gap-3">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="text-f1-muted hover:text-f1-text"
+            className="text-label-secondary hover:text-label-primary transition-colors"
           >
             <Menu size={20} />
           </button>
-          <h1 className="text-lg font-bold">
-            <span className="text-f1-red">F1</span> Dashboard
+          <h1 className="text-headline">
+            F1
           </h1>
         </div>
-        <div className="p-6">{children}</div>
+
+        {/* Page content with Apple-style margins */}
+        <div className="max-w-7xl mx-auto px-8 py-6">{children}</div>
       </main>
     </div>
   )

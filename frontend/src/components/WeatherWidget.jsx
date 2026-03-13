@@ -15,7 +15,7 @@ function getRainColor(rainfall) {
 }
 
 export default function WeatherWidget({ weather }) {
-  if (!weather) return <div className="text-f1-muted text-sm text-center py-4">No weather data</div>
+  if (!weather) return <div className="text-label-tertiary text-sm text-center py-4">No weather data</div>
 
   const airTemp = weather.air_temp ?? weather.air_temperature
   const trackTemp = weather.track_temp ?? weather.track_temperature

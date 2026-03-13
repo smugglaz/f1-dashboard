@@ -41,10 +41,10 @@ export default function RaceSummaryCard({ year, round }) {
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
-            <Trophy className="h-4 w-4 text-f1-muted" />
+            <Trophy className="h-4 w-4 text-label-tertiary" />
             {race.name}
           </CardTitle>
-          <span className="text-xs text-f1-muted">
+          <span className="text-xs text-label-tertiary">
             {race.date ? new Date(race.date).toLocaleDateString() : ''}
           </span>
         </div>
@@ -53,21 +53,21 @@ export default function RaceSummaryCard({ year, round }) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Winner info */}
           <div>
-            <p className="text-[10px] text-f1-muted uppercase tracking-wider mb-2">Winner</p>
+            <p className="text-[10px] text-label-tertiary uppercase tracking-wider mb-2">Winner</p>
             <div className="flex items-center gap-3">
               <div className="w-1.5 h-10 rounded-full" style={{ backgroundColor: teamColor }} />
               <div>
                 <div className="text-lg font-bold">{winner.name}</div>
-                <div className="text-sm text-f1-muted">{winner.constructor} &middot; from P{winner.grid}</div>
+                <div className="text-sm text-label-tertiary">{winner.constructor} &middot; from P{winner.grid}</div>
               </div>
             </div>
             {second && (
-              <p className="text-xs text-f1-muted mt-2">
-                Margin: <span className="font-mono font-semibold text-f1-text">{margin || second.time}</span> to {second.code}
+              <p className="text-xs text-label-tertiary mt-2">
+                Margin: <span className="font-mono font-semibold text-label-primary">{margin || second.time}</span> to {second.code}
               </p>
             )}
             {fastest_lap && (
-              <p className="text-xs text-f1-muted mt-1">
+              <p className="text-xs text-label-tertiary mt-1">
                 FL: <span className="font-mono text-purple-400">{fastest_lap.time}</span> ({fastest_lap.code})
               </p>
             )}
@@ -75,7 +75,7 @@ export default function RaceSummaryCard({ year, round }) {
 
           {/* Race events */}
           <div>
-            <p className="text-[10px] text-f1-muted uppercase tracking-wider mb-2">Race Events</p>
+            <p className="text-[10px] text-label-tertiary uppercase tracking-wider mb-2">Race Events</p>
             <div className="flex flex-wrap gap-1.5 mb-3">
               {safety_cars > 0 && <Badge variant="warning">SC &times; {safety_cars}</Badge>}
               {virtual_safety_cars > 0 && <Badge variant="warning">VSC &times; {virtual_safety_cars}</Badge>}
@@ -91,10 +91,10 @@ export default function RaceSummaryCard({ year, round }) {
 
           {/* Circuit + weather */}
           <div>
-            <p className="text-[10px] text-f1-muted uppercase tracking-wider mb-2">Circuit & Conditions</p>
+            <p className="text-[10px] text-label-tertiary uppercase tracking-wider mb-2">Circuit & Conditions</p>
             {circuit && (
               <div className="space-y-1 text-xs">
-                <div className="flex items-center gap-1.5 text-f1-muted">
+                <div className="flex items-center gap-1.5 text-label-tertiary">
                   <MapPin className="h-3 w-3" />
                   {circuit.locality}, {circuit.country}
                 </div>
@@ -107,7 +107,7 @@ export default function RaceSummaryCard({ year, round }) {
               </div>
             )}
             {weather && (weather.avg_air_temp || weather.avg_track_temp) && (
-              <div className="flex items-center gap-1.5 text-xs text-f1-muted mt-2">
+              <div className="flex items-center gap-1.5 text-xs text-label-tertiary mt-2">
                 <Thermometer className="h-3 w-3" />
                 {weather.avg_air_temp && `Air ${weather.avg_air_temp}°C`}
                 {weather.avg_air_temp && weather.avg_track_temp && ' / '}

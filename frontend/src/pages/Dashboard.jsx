@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useApi } from '../hooks/useApi'
+import { useScrollReveal } from '@/hooks/useScrollReveal'
 import { PageHeader } from '@/components/ui/page-header'
 import { DataCard } from '@/components/ui/data-card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -13,6 +14,15 @@ import StandingsTable from '../components/StandingsTable'
 import PointsProgression from '../components/PointsProgression'
 import TeammateComparison from '../components/TeammateComparison'
 import DriverStatsCard from '../components/DriverStatsCard'
+
+function RevealSection({ children }) {
+  const { ref, visible } = useScrollReveal()
+  return (
+    <div ref={ref} className={`scroll-reveal ${visible ? 'visible' : ''}`}>
+      {children}
+    </div>
+  )
+}
 
 export default function Dashboard() {
   const currentYear = new Date().getFullYear()
@@ -42,9 +52,9 @@ export default function Dashboard() {
   const yearList = Array.from({ length: currentYear - 1949 }, (_, i) => currentYear - i)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header + year selector */}
-      <PageHeader title="F1 Dashboard" subtitle={`${year} Season`}>
+      <PageHeader title={`${year} Season`}>
         <Select value={String(year)} onValueChange={v => setYear(Number(v))}>
           <SelectTrigger className="w-24">
             <SelectValue />
@@ -61,7 +71,7 @@ export default function Dashboard() {
       {loadingD || loadingC || loadingR ? (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[1,2,3,4].map(i => (
-            <div key={i} className="bg-f1-card rounded-lg border border-f1-border p-4 space-y-2">
+            <div key={i} className="glass rounded-2xl p-5 space-y-3">
               <Skeleton className="h-3 w-24" />
               <Skeleton className="h-8 w-16" />
               <Skeleton className="h-3 w-32" />
@@ -78,7 +88,7 @@ export default function Dashboard() {
       )}
 
       {/* Race Timeline strip */}
-      {!loadingR && <RaceTimeline races={races} />}
+      {!loadingR && <RaceTimeline races={races} year={year} />}
 
       {/* Recent Race + Upcoming Race side by side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -87,64 +97,72 @@ export default function Dashboard() {
       </div>
 
       {/* Standings side-by-side */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <DataCard title="Driver Standings" icon={BarChart3}>
-          {loadingD ? (
-            <div className="space-y-2">
-              {[1,2,3,4,5].map(i => <Skeleton key={i} className="h-8 w-full" />)}
-            </div>
-          ) : (
-            <StandingsTable data={driverStandings} type="driver" />
-          )}
-        </DataCard>
-        <DataCard title="Constructor Standings" icon={Users}>
-          {loadingC ? (
-            <div className="space-y-2">
-              {[1,2,3,4,5].map(i => <Skeleton key={i} className="h-8 w-full" />)}
-            </div>
-          ) : (
-            <StandingsTable data={constructorStandings} type="constructor" />
-          )}
-        </DataCard>
-      </div>
+      <RevealSection>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <DataCard title="Driver Standings" icon={BarChart3}>
+            {loadingD ? (
+              <div className="space-y-2">
+                {[1,2,3,4,5].map(i => <Skeleton key={i} className="h-8 w-full" />)}
+              </div>
+            ) : (
+              <StandingsTable data={driverStandings} type="driver" />
+            )}
+          </DataCard>
+          <DataCard title="Constructor Standings" icon={Users}>
+            {loadingC ? (
+              <div className="space-y-2">
+                {[1,2,3,4,5].map(i => <Skeleton key={i} className="h-8 w-full" />)}
+              </div>
+            ) : (
+              <StandingsTable data={constructorStandings} type="constructor" />
+            )}
+          </DataCard>
+        </div>
+      </RevealSection>
 
       {/* Championship Progression */}
-      <DataCard title="Championship Progression" icon={TrendingUp}>
-        <PointsProgression year={year} />
-      </DataCard>
+      <RevealSection>
+        <DataCard title="Championship Progression" icon={TrendingUp}>
+          <PointsProgression year={year} />
+        </DataCard>
+      </RevealSection>
 
       {/* Driver Season Stats */}
       {driverStandings.length > 0 && (
-        <DataCard
-          title="Driver Season Stats"
-          icon={BarChart3}
-          action={
-            <select
-              value={selectedDriver || ''}
-              onChange={e => setSelectedDriver(e.target.value || null)}
-              className="bg-white border border-f1-border rounded px-2 py-1 text-xs"
-            >
-              <option value="">Select driver...</option>
-              {driverStandings.map(s => (
-                <option key={s.driver.id} value={s.driver.id}>
-                  {s.driver.code} — {s.driver.name}
-                </option>
-              ))}
-            </select>
-          }
-        >
-          {selectedDriver ? (
-            <DriverStatsCard year={year} driverId={selectedDriver} />
-          ) : (
-            <p className="text-sm text-f1-muted text-center py-3">Select a driver to view season statistics</p>
-          )}
-        </DataCard>
+        <RevealSection>
+          <DataCard
+            title="Driver Season Stats"
+            icon={BarChart3}
+            action={
+              <Select value={selectedDriver || ''} onValueChange={v => setSelectedDriver(v || null)}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Select driver..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {driverStandings.map(s => (
+                    <SelectItem key={s.driver.id} value={s.driver.id}>
+                      {s.driver.code} — {s.driver.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            }
+          >
+            {selectedDriver ? (
+              <DriverStatsCard year={year} driverId={selectedDriver} />
+            ) : (
+              <p className="text-footnote text-center py-3">Select a driver to view season statistics</p>
+            )}
+          </DataCard>
+        </RevealSection>
       )}
 
       {/* Teammate Comparison */}
-      <DataCard title="Teammate Comparison" icon={GitCompare}>
-        <TeammateComparison year={year} />
-      </DataCard>
+      <RevealSection>
+        <DataCard title="Teammate Comparison" icon={GitCompare}>
+          <TeammateComparison year={year} />
+        </DataCard>
+      </RevealSection>
     </div>
   )
 }

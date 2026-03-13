@@ -34,7 +34,7 @@ export default function SectorAnalysis({ year, round, session = 'Qualifying' }) 
       <Card>
         <CardHeader><CardTitle className="flex items-center gap-2"><Timer className="h-4 w-4" />Sector Analysis</CardTitle></CardHeader>
         <CardContent>
-          <p className="text-sm text-f1-muted text-center py-4">
+          <p className="text-sm text-label-tertiary text-center py-4">
             No sector data available. Requires FastF1 data (2018+ races).
           </p>
         </CardContent>
@@ -48,7 +48,7 @@ export default function SectorAnalysis({ year, round, session = 'Qualifying' }) 
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Timer className="h-4 w-4 text-f1-muted" />
+          <Timer className="h-4 w-4 text-label-tertiary" />
           Sector Analysis — {session}
         </CardTitle>
       </CardHeader>
@@ -58,7 +58,7 @@ export default function SectorAnalysis({ year, round, session = 'Qualifying' }) 
           <div className="mb-3 px-3 py-2 rounded bg-purple-500/10 border border-purple-500/20 text-xs">
             <span className="text-purple-400 font-semibold">Theoretical Best: </span>
             <span className="font-mono font-bold text-purple-300">{msToTime(session_bests.theoretical_best_ms)}</span>
-            <span className="text-f1-muted ml-2">
+            <span className="text-label-tertiary ml-2">
               ({msToTime(session_bests.s1_ms)} + {msToTime(session_bests.s2_ms)} + {msToTime(session_bests.s3_ms)})
             </span>
           </div>
@@ -67,7 +67,7 @@ export default function SectorAnalysis({ year, round, session = 'Qualifying' }) 
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-f1-border text-f1-muted text-[10px] tracking-wider uppercase">
+              <tr className="border-b border-glass-border text-label-tertiary text-[10px] tracking-wider uppercase">
                 <th className="py-2 px-2 text-left w-10">#</th>
                 <th className="py-2 px-2 text-left">DRIVER</th>
                 <th className="py-2 px-2 text-right">S1</th>
@@ -80,8 +80,8 @@ export default function SectorAnalysis({ year, round, session = 'Qualifying' }) 
             </thead>
             <tbody>
               {drivers.map((d, i) => (
-                <tr key={d.code} className="border-b border-f1-border/20 hover:bg-black/[0.04] transition-colors">
-                  <td className="py-1.5 px-2 text-xs text-f1-muted font-mono">{i + 1}</td>
+                <tr key={d.code} className="border-b border-glass-border/50 hover:bg-black/[0.04] transition-colors">
+                  <td className="py-1.5 px-2 text-xs text-label-tertiary font-mono">{i + 1}</td>
                   <td className="py-1.5 px-2">
                     <span className="text-xs font-mono font-bold">{d.code}</span>
                   </td>
@@ -97,7 +97,7 @@ export default function SectorAnalysis({ year, round, session = 'Qualifying' }) 
                   <td className="py-1.5 px-2 text-right font-mono text-xs font-semibold">
                     {msToTime(d.best_lap_ms)}
                   </td>
-                  <td className="py-1.5 px-2 text-right font-mono text-xs text-f1-muted">
+                  <td className="py-1.5 px-2 text-right font-mono text-xs text-label-tertiary">
                     {msToTime(d.theoretical_best_ms)}
                   </td>
                   <td className="py-1.5 px-2 text-right font-mono text-xs">

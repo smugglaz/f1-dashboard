@@ -5,6 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { getTireColor, TIRE_COLORS } from '@/utils/colors'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { rechartsGlassTheme } from '@/utils/chartTheme'
 import { CircleDot } from 'lucide-react'
 
 function msToLapTime(ms) {
@@ -58,7 +59,7 @@ export default function TyreDegradation({ year, round }) {
       <Card>
         <CardHeader><CardTitle className="flex items-center gap-2"><CircleDot className="h-4 w-4" />Tyre Degradation</CardTitle></CardHeader>
         <CardContent>
-          <p className="text-sm text-f1-muted text-center py-4">
+          <p className="text-sm text-label-tertiary text-center py-4">
             No tyre performance data available. Requires FastF1 data (2018+ races).
           </p>
         </CardContent>
@@ -71,7 +72,7 @@ export default function TyreDegradation({ year, round }) {
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
-            <CircleDot className="h-4 w-4 text-f1-muted" />
+            <CircleDot className="h-4 w-4 text-label-tertiary" />
             Tyre Degradation
           </CardTitle>
           <div className="flex gap-1.5">
@@ -84,27 +85,28 @@ export default function TyreDegradation({ year, round }) {
         </div>
       </CardHeader>
       <CardContent>
-        <p className="text-xs text-f1-muted mb-3">
+        <p className="text-xs text-label-tertiary mb-3">
           Average lap time by tyre life (green flag, accurate laps only). {data.total_laps_analyzed} laps analyzed.
         </p>
         <ResponsiveContainer width="100%" height={350}>
           <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#E2E5EA" />
+            <CartesianGrid {...rechartsGlassTheme.grid} />
             <XAxis
               dataKey="tyre_life"
-              label={{ value: 'Tyre Life (laps)', position: 'insideBottom', offset: -5, style: { fill: '#9CA3AF', fontSize: 11 } }}
-              stroke="#9CA3AF"
-              tick={{ fill: '#9CA3AF', fontSize: 10 }}
+              label={{ value: 'Tyre Life (laps)', position: 'insideBottom', offset: -5, style: rechartsGlassTheme.label }}
+              stroke={rechartsGlassTheme.axis.axisLine.stroke}
+              tick={rechartsGlassTheme.axis.tick}
             />
             <YAxis
               domain={['auto', 'auto']}
               tickFormatter={v => msToLapTime(v * 1000)}
-              stroke="#9CA3AF"
-              tick={{ fill: '#9CA3AF', fontSize: 10 }}
-              label={{ value: 'Lap Time', angle: -90, position: 'insideLeft', style: { fill: '#9CA3AF', fontSize: 11 } }}
+              stroke={rechartsGlassTheme.axis.axisLine.stroke}
+              tick={rechartsGlassTheme.axis.tick}
+              label={{ value: 'Lap Time', angle: -90, position: 'insideLeft', style: rechartsGlassTheme.label }}
             />
             <Tooltip
-              contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #E2E5EA', borderRadius: 8, fontSize: 12 }}
+              contentStyle={rechartsGlassTheme.tooltip.contentStyle}
+              labelStyle={rechartsGlassTheme.tooltip.labelStyle}
               labelFormatter={v => `Tyre Life: ${v} laps`}
               formatter={(v, name) => [msToLapTime(v * 1000), name]}
             />

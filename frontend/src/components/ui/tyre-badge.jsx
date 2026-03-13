@@ -22,7 +22,7 @@ function TyreBadge({ compound, age, className }) {
         {short}
       </span>
       {age !== undefined && (
-        <span className="text-xs text-f1-muted font-mono">{age}L</span>
+        <span className="text-xs text-label-tertiary font-mono">{age}L</span>
       )}
     </div>
   )

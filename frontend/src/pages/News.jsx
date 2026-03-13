@@ -87,7 +87,7 @@ export default function News() {
             >
               Previous
             </Button>
-            <span className="px-4 py-2 text-sm text-f1-muted font-mono">
+            <span className="px-4 py-2 text-sm text-label-tertiary font-mono">
               Page {page}
               {total != null && ` of ${Math.ceil(total / 20)}`}
             </span>

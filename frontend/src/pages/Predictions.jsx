@@ -5,6 +5,7 @@ import { getTeamColor } from '../utils/teams'
 import { getPositionColor } from '../utils/colors'
 import { formatDriverName } from '../utils/format'
 
+import { getPlotlyGlassLayout } from '@/utils/chartTheme'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { PageHeader } from '@/components/ui/page-header'
@@ -65,41 +66,41 @@ export default function Predictions() {
         <Card className="animate-fade-in">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
-              <Brain className="h-3.5 w-3.5 text-f1-muted" />
+              <Brain className="h-3.5 w-3.5 text-label-tertiary" />
               Model Information
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div>
-                <div className="text-f1-muted text-xs">Algorithm</div>
+                <div className="text-label-tertiary text-xs">Algorithm</div>
                 <div>{modelInfo.algorithm || 'Gradient Boosting'}</div>
               </div>
               <div>
-                <div className="text-f1-muted text-xs">Training Samples</div>
+                <div className="text-label-tertiary text-xs">Training Samples</div>
                 <div>{modelInfo.training_samples?.toLocaleString() || '-'}</div>
               </div>
               <div>
-                <div className="text-f1-muted text-xs">Accuracy</div>
+                <div className="text-label-tertiary text-xs">Accuracy</div>
                 <div>{modelInfo.accuracy ? `${(modelInfo.accuracy * 100).toFixed(1)}%` : '-'}</div>
               </div>
               <div>
-                <div className="text-f1-muted text-xs">Last Trained</div>
+                <div className="text-label-tertiary text-xs">Last Trained</div>
                 <div>{modelInfo.last_trained ? new Date(modelInfo.last_trained).toLocaleDateString() : '-'}</div>
               </div>
             </div>
             {modelInfo.feature_importance && (
               <div className="mt-4">
-                <div className="text-f1-muted text-xs mb-2">Feature Importance</div>
+                <div className="text-label-tertiary text-xs mb-2">Feature Importance</div>
                 <div className="space-y-1">
                   {Object.entries(modelInfo.feature_importance)
                     .sort(([, a], [, b]) => b - a)
                     .slice(0, 5)
                     .map(([feat, imp]) => (
                       <div key={feat} className="flex items-center gap-2 text-xs">
-                        <span className="w-40 text-f1-muted">{feat.replace(/_/g, ' ')}</span>
-                        <div className="flex-1 bg-f1-border rounded-full h-2">
-                          <div className="bg-f1-red h-2 rounded-full" style={{ width: `${imp * 100}%` }} />
+                        <span className="w-40 text-label-tertiary">{feat.replace(/_/g, ' ')}</span>
+                        <div className="flex-1 bg-glass-border rounded-full h-2">
+                          <div className="bg-f1-red/80 h-2 rounded-full" style={{ width: `${imp * 100}%` }} />
                         </div>
                         <span className="w-12 text-right">{(imp * 100).toFixed(1)}%</span>
                       </div>
@@ -115,7 +116,7 @@ export default function Predictions() {
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm flex items-center gap-2">
-            <BarChart3 className="h-3.5 w-3.5 text-f1-muted" />
+            <BarChart3 className="h-3.5 w-3.5 text-label-tertiary" />
             Podium Probability
           </CardTitle>
         </CardHeader>
@@ -129,22 +130,17 @@ export default function Predictions() {
               marker: { color: barColors },
               text: top10.map(d => `${((d.podium_probability || 0) * 100).toFixed(1)}%`).reverse(),
               textposition: 'outside',
-              textfont: { color: '#1A1A2E', size: 11, family: '-apple-system, BlinkMacSystemFont, sans-serif' },
+              textfont: { color: '#1d1d1f', size: 11, family: 'Inter, system-ui, sans-serif' },
               hovertemplate: '%{y}: %{x:.1f}%<extra></extra>',
             }]}
-            layout={{
-              paper_bgcolor: 'transparent',
-              plot_bgcolor: 'transparent',
-              font: { color: '#1A1A2E', size: 11, family: '-apple-system, BlinkMacSystemFont, sans-serif' },
+            layout={getPlotlyGlassLayout({
               margin: { l: 60, r: 60, t: 10, b: 40 },
               xaxis: {
-                title: { text: 'Probability (%)', font: { size: 10 } },
-                gridcolor: '#E2E5EA',
+                title: { text: 'Probability (%)' },
                 range: [0, 80],
               },
-              yaxis: { gridcolor: '#E2E5EA' },
               height: 350,
-            }}
+            })}
             config={{ responsive: true, displayModeBar: false }}
             style={{ width: '100%' }}
           />
@@ -160,7 +156,7 @@ export default function Predictions() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-f1-border text-f1-muted text-[10px] tracking-wider uppercase">
+                <tr className="border-b border-glass-border text-label-tertiary text-[10px] tracking-wider uppercase">
                   <th className="py-2 px-3 text-left w-10">#</th>
                   <th className="py-2 px-3 text-left">DRIVER</th>
                   <th className="py-2 px-3 text-left">TEAM</th>
@@ -179,7 +175,7 @@ export default function Predictions() {
                   return (
                     <tr
                       key={i}
-                      className="border-b border-f1-border/20 hover:bg-black/[0.04] transition-colors team-stripe"
+                      className="border-b border-glass-border/50 hover:bg-black/[0.04] transition-colors team-stripe"
                       style={{ '--stripe-color': teamColor }}
                     >
                       <td className="py-2 px-3">
@@ -194,7 +190,7 @@ export default function Predictions() {
                         <div className="flex items-center gap-2">
                           <span className="font-bold text-xs font-mono">{code}</span>
                           {fullName && (
-                            <span className="text-f1-muted text-xs hidden sm:inline">
+                            <span className="text-label-tertiary text-xs hidden sm:inline">
                               {formatDriverName(code, fullName)}
                             </span>
                           )}
@@ -203,13 +199,13 @@ export default function Predictions() {
                       <td className="py-2 px-3">
                         <div className="flex items-center gap-2">
                           <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: teamColor }} />
-                          <span className="text-xs text-f1-muted">{d.constructor || '-'}</span>
+                          <span className="text-xs text-label-tertiary">{d.constructor || '-'}</span>
                         </div>
                       </td>
                       <td className="py-2 px-3 text-right font-mono font-semibold">
                         {d.podium_probability ? `${(d.podium_probability * 100).toFixed(1)}%` : '-'}
                       </td>
-                      <td className="py-2 px-3 text-right font-mono text-xs text-f1-muted">
+                      <td className="py-2 px-3 text-right font-mono text-xs text-label-tertiary">
                         {d.grid_position || '-'}
                       </td>
                     </tr>
@@ -223,7 +219,7 @@ export default function Predictions() {
 
       <Card className="border-yellow-500/30 bg-yellow-500/5">
         <CardContent className="pt-4">
-          <div className="flex items-start gap-3 text-sm text-yellow-200">
+          <div className="flex items-start gap-3 text-sm text-yellow-700">
             <AlertTriangle className="h-4 w-4 text-yellow-500 shrink-0 mt-0.5" />
             <div>
               <strong>Disclaimer:</strong> Predictions are generated by a machine learning model trained on historical data.

@@ -26,11 +26,11 @@ export default function DataTable({ columns, data, onRowClick }) {
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-f1-border">
+          <tr className="border-b border-glass-border">
             {columns.map(col => (
               <th
                 key={col.key}
-                className="px-3 py-2 text-left text-f1-muted font-medium cursor-pointer hover:text-f1-text"
+                className="px-3 py-2 text-left text-label-tertiary font-medium cursor-pointer hover:text-label-primary"
                 onClick={() => handleSort(col.key)}
               >
                 {col.label}
@@ -43,7 +43,7 @@ export default function DataTable({ columns, data, onRowClick }) {
           {sorted.map((row, i) => (
             <tr
               key={i}
-              className="border-b border-f1-border/50 hover:bg-f1-border/20 transition-colors"
+              className="border-b border-glass-border/50 hover:bg-glass-border/20 transition-colors"
               onClick={() => onRowClick?.(row)}
               style={{ cursor: onRowClick ? 'pointer' : 'default' }}
             >
@@ -57,7 +57,7 @@ export default function DataTable({ columns, data, onRowClick }) {
         </tbody>
       </table>
       {(!data || data.length === 0) && (
-        <div className="text-center py-8 text-f1-muted">No data available</div>
+        <div className="text-center py-8 text-label-tertiary">No data available</div>
       )}
     </div>
   )

@@ -99,7 +99,7 @@ export default function LiveTiming() {
               {sessionLabel}
             </Badge>
           )}
-          <div className={`flex items-center gap-1.5 text-xs ${wsConnected ? 'text-green-400' : 'text-f1-muted'}`}>
+          <div className={`flex items-center gap-1.5 text-xs ${wsConnected ? 'text-green-400' : 'text-label-tertiary'}`}>
             <div className={`w-2 h-2 rounded-full ${wsConnected ? 'bg-green-400 animate-pulse-dot' : 'bg-gray-500'}`} />
             {wsConnected ? 'LIVE' : wsStatus === 'reconnecting' ? 'RECONNECTING' : 'DISCONNECTED'}
           </div>
@@ -123,7 +123,7 @@ export default function LiveTiming() {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm flex items-center gap-2">
-                  <Cloud className="h-3.5 w-3.5 text-f1-muted" />
+                  <Cloud className="h-3.5 w-3.5 text-label-tertiary" />
                   Weather
                 </CardTitle>
               </CardHeader>
@@ -134,7 +134,7 @@ export default function LiveTiming() {
             <Card className="lg:col-span-2">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm flex items-center gap-2">
-                  <Radio className="h-3.5 w-3.5 text-f1-muted" />
+                  <Radio className="h-3.5 w-3.5 text-label-tertiary" />
                   Race Control
                 </CardTitle>
               </CardHeader>
@@ -148,10 +148,10 @@ export default function LiveTiming() {
             <Card className="xl:col-span-3">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm flex items-center gap-2">
-                  <Timer className="h-3.5 w-3.5 text-f1-muted" />
+                  <Timer className="h-3.5 w-3.5 text-label-tertiary" />
                   Timing Tower
                   {timing.length > 0 && (
-                    <span className="text-[10px] text-f1-muted font-mono font-normal ml-auto">
+                    <span className="text-[10px] text-label-tertiary font-mono font-normal ml-auto">
                       {timing.length} drivers
                     </span>
                   )}
@@ -164,7 +164,7 @@ export default function LiveTiming() {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm flex items-center gap-2">
-                  <Map className="h-3.5 w-3.5 text-f1-muted" />
+                  <Map className="h-3.5 w-3.5 text-label-tertiary" />
                   Track Map
                 </CardTitle>
               </CardHeader>

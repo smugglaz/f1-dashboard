@@ -48,12 +48,12 @@ export default function StandingsTable({ data = [], type = 'driver' }) {
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-f1-border text-f1-muted">
+          <tr className="border-b border-glass-border text-label-tertiary">
             {cols.map(c => (
               <th
                 key={c.key}
                 onClick={() => handleSort(c.key)}
-                className={`py-2 px-3 cursor-pointer hover:text-f1-text select-none text-xs tracking-wider ${
+                className={`py-3 px-3 cursor-pointer hover:text-label-primary select-none text-caption-2 uppercase tracking-wider ${
                   c.align === 'right' ? 'text-right' : 'text-left'
                 }`}
               >
@@ -72,7 +72,7 @@ export default function StandingsTable({ data = [], type = 'driver' }) {
             return (
               <tr
                 key={i}
-                className="border-b border-f1-border/20 hover:bg-black/[0.04] transition-colors team-stripe"
+                className="border-b border-glass-border/50 hover:bg-black/[0.03] transition-colors team-stripe"
                 style={{ '--stripe-color': teamColor }}
               >
                 {cols.map(c => {
@@ -80,9 +80,9 @@ export default function StandingsTable({ data = [], type = 'driver' }) {
 
                   if (c.key === 'position') {
                     return (
-                      <td key={c.key} className="py-2 px-3">
+                      <td key={c.key} className="py-3 px-3">
                         <span
-                          className="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold"
+                          className="inline-flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold font-mono"
                           style={posColor ? { backgroundColor: `${posColor}22`, color: posColor } : {}}
                         >
                           {val ?? '-'}
@@ -95,10 +95,10 @@ export default function StandingsTable({ data = [], type = 'driver' }) {
                     const code = val || ''
                     const fullName = getVal(row, 'driver.name') || ''
                     return (
-                      <td key={c.key} className="py-2 px-3">
+                      <td key={c.key} className="py-3 px-3">
                         <div className="flex items-center gap-2">
                           <span className="font-bold text-xs font-mono w-8">{code}</span>
-                          <span className="text-f1-muted text-xs">{formatDriverName(code, fullName)}</span>
+                          <span className="text-label-secondary text-xs">{formatDriverName(code, fullName)}</span>
                         </div>
                       </td>
                     )
@@ -107,7 +107,7 @@ export default function StandingsTable({ data = [], type = 'driver' }) {
                   if (c.key === 'constructor' || c.key === 'constructor.name') {
                     const name = type === 'driver' ? row.constructor : getVal(row, 'constructor.name')
                     return (
-                      <td key={c.key} className="py-2 px-3">
+                      <td key={c.key} className="py-3 px-3">
                         <div className="flex items-center gap-2">
                           <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: getTeamColor(name) }} />
                           <span className="text-xs">{name || '-'}</span>
@@ -117,13 +117,13 @@ export default function StandingsTable({ data = [], type = 'driver' }) {
                   }
 
                   if (c.key === 'points') {
-                    return <td key={c.key} className="py-2 px-3 text-right font-mono font-semibold">{val ?? '-'}</td>
+                    return <td key={c.key} className="py-3 px-3 text-right font-mono font-bold text-label-primary">{val ?? '-'}</td>
                   }
 
                   if (c.key === 'gap') {
                     const pts = getVal(row, 'points') || 0
                     return (
-                      <td key={c.key} className="py-2 px-3 w-28">
+                      <td key={c.key} className="py-3 px-3 w-28">
                         <GapBar value={pts} maxValue={maxPoints} color={teamColor} />
                       </td>
                     )
@@ -131,21 +131,21 @@ export default function StandingsTable({ data = [], type = 'driver' }) {
 
                   if (c.key === 'wins') {
                     return (
-                      <td key={c.key} className="py-2 px-3 text-right">
+                      <td key={c.key} className="py-3 px-3 text-right">
                         {val > 0 ? (
-                          <span className="inline-flex items-center justify-center min-w-5 h-5 rounded-full bg-f1-red/20 text-f1-red text-xs font-bold px-1.5">{val}</span>
-                        ) : <span className="text-f1-muted text-xs">-</span>}
+                          <span className="inline-flex items-center justify-center min-w-5 h-5 rounded-full bg-amber-500/15 text-amber-700 text-xs font-bold font-mono px-1.5">{val}</span>
+                        ) : <span className="text-label-quaternary text-xs">-</span>}
                       </td>
                     )
                   }
 
-                  return <td key={c.key} className={`py-2 px-3 ${c.align === 'right' ? 'text-right' : ''}`}>{val ?? '-'}</td>
+                  return <td key={c.key} className={`py-3 px-3 ${c.align === 'right' ? 'text-right' : ''}`}>{val ?? '-'}</td>
                 })}
               </tr>
             )
           })}
           {sorted.length === 0 && (
-            <tr><td colSpan={cols.length} className="py-8 text-center text-f1-muted">No standings data</td></tr>
+            <tr><td colSpan={cols.length} className="py-8 text-center text-label-tertiary text-footnote">No standings data</td></tr>
           )}
         </tbody>
       </table>

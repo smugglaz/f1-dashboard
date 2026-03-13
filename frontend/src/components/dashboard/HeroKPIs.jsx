@@ -42,9 +42,8 @@ export default function HeroKPIs({ driverStandings, constructorStandings, races,
         deltaLabel={stats.second ? `over ${stats.second.driver?.code}` : null}
         trend={stats.gap > 0 ? 'up' : 'neutral'}
         icon={Trophy}
-        accentColor={stats.leader ? getTeamColor(stats.leader.constructor || '') : undefined}
       >
-        <p className="text-xs text-f1-muted mt-1">
+        <p className="text-caption-1 mt-1">
           {stats.leader?.points || 0} points &middot; {stats.leader?.wins || 0} wins
         </p>
       </KpiCard>
@@ -56,7 +55,6 @@ export default function HeroKPIs({ driverStandings, constructorStandings, races,
         deltaLabel={stats.winsLeader?.constructor || ''}
         trend="up"
         icon={Flag}
-        accentColor={stats.winsLeader ? getTeamColor(stats.winsLeader.constructor || '') : undefined}
       />
 
       <KpiCard
@@ -66,9 +64,8 @@ export default function HeroKPIs({ driverStandings, constructorStandings, races,
         deltaLabel={stats.secondTeam ? `over ${stats.secondTeam.constructor?.name}` : null}
         trend={stats.constructorGap > 0 ? 'up' : 'neutral'}
         icon={Users}
-        accentColor={stats.topTeam ? getTeamColor(stats.topTeam.constructor?.name || '') : undefined}
       >
-        <p className="text-xs text-f1-muted mt-1">
+        <p className="text-caption-1 mt-1">
           {stats.topTeam?.points || 0} points
         </p>
       </KpiCard>
@@ -80,10 +77,9 @@ export default function HeroKPIs({ driverStandings, constructorStandings, races,
         deltaLabel={stats.nextRace?.name?.replace(' Grand Prix', ' GP') || `of ${stats.totalRaces}`}
         trend="neutral"
         icon={Calendar}
-        accentColor="var(--f1-red, #E10600)"
       >
         {stats.nextRace && (
-          <p className="text-xs text-f1-muted mt-1">
+          <p className="text-caption-1 mt-1">
             {stats.nextRace.circuit?.name}
           </p>
         )}

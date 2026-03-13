@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import { useApi, fetchApi } from '../hooks/useApi'
 import {
   formatLapTime, parseLapTime, formatDriverName,
@@ -8,6 +9,7 @@ import {
 import { getPositionColor } from '../utils/colors'
 import { getTeamColor } from '../utils/teams'
 import Plot from 'react-plotly.js'
+import { getPlotlyGlassLayout } from '@/utils/chartTheme'
 
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -15,7 +17,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { PageHeader } from '@/components/ui/page-header'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { Database } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Database, LayoutGrid, Table2, ArrowRight, Trophy, Flag, Calendar } from 'lucide-react'
 
 import RaceSummaryCard from '@/components/race/RaceSummaryCard'
 import StrategyTimeline from '@/components/race/StrategyTimeline'
@@ -28,6 +31,7 @@ export default function History() {
   const [year, setYear] = useState(currentYear)
   const [round, setRound] = useState(1)
   const [tab, setTab] = useState('results')
+  const [view, setView] = useState('overview') // 'overview' | 'detail'
   const [syncing, setSyncing] = useState(false)
   const [syncError, setSyncError] = useState(null)
 
@@ -107,27 +111,47 @@ export default function History() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Race Analysis"
-        subtitle={raceInfo ? `${raceInfo.name} — ${raceInfo.circuit}` : `${year} Season`}
+        title={view === 'overview' ? `${year} Season` : 'Race Analysis'}
+        subtitle={view === 'detail' && raceInfo ? `${raceInfo.name} — ${raceInfo.circuit}` : view === 'overview' ? `${races.length} rounds` : `${year} Season`}
       >
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
           <select
             value={year}
             onChange={e => setYear(Number(e.target.value))}
-            className="bg-f1-card border border-f1-border rounded px-3 py-1.5 text-sm"
+            className="bg-glass-bg border border-glass-border rounded-lg px-3 py-1.5 text-sm"
           >
             {yearList.map(y => <option key={y} value={y}>{y}</option>)}
           </select>
-          <select
-            value={round}
-            onChange={e => setRound(Number(e.target.value))}
-            disabled={races.length === 0}
-            className="bg-f1-card border border-f1-border rounded px-3 py-1.5 text-sm disabled:opacity-40"
-          >
-            {races.map(r => (
-              <option key={r.round} value={r.round}>R{r.round} — {r.name}</option>
-            ))}
-          </select>
+          {view === 'detail' && (
+            <select
+              value={round}
+              onChange={e => setRound(Number(e.target.value))}
+              disabled={races.length === 0}
+              className="bg-glass-bg border border-glass-border rounded-lg px-3 py-1.5 text-sm disabled:opacity-40"
+            >
+              {races.map(r => (
+                <option key={r.round} value={r.round}>R{r.round} — {r.name}</option>
+              ))}
+            </select>
+          )}
+          <div className="flex border border-glass-border rounded-lg overflow-hidden">
+            <button
+              onClick={() => setView('overview')}
+              className={`px-2.5 py-1.5 text-xs flex items-center gap-1 transition-colors ${
+                view === 'overview' ? 'bg-label-primary text-white' : 'text-label-secondary hover:bg-black/[0.04]'
+              }`}
+            >
+              <LayoutGrid className="h-3 w-3" />
+            </button>
+            <button
+              onClick={() => setView('detail')}
+              className={`px-2.5 py-1.5 text-xs flex items-center gap-1 transition-colors ${
+                view === 'detail' ? 'bg-label-primary text-white' : 'text-label-secondary hover:bg-black/[0.04]'
+              }`}
+            >
+              <Table2 className="h-3 w-3" />
+            </button>
+          </div>
         </div>
       </PageHeader>
 
@@ -145,7 +169,65 @@ export default function History() {
         <p className="text-red-400 text-xs text-center">{syncError}</p>
       )}
 
-      {races.length > 0 && (
+      {/* Season Overview Grid */}
+      {races.length > 0 && view === 'overview' && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {races.map(r => {
+            const isPast = r.date && new Date(r.date) < new Date()
+            const raceDate = r.date ? new Date(r.date) : null
+            return (
+              <Card key={r.round} className="group relative overflow-hidden">
+                <CardContent className="p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-caption-2 uppercase tracking-wider text-label-tertiary">
+                      Round {r.round}
+                    </span>
+                    {r.has_sprint && (
+                      <Badge variant="outline" className="text-[9px] border-orange-500/30 text-orange-500">
+                        Sprint
+                      </Badge>
+                    )}
+                  </div>
+                  <h3 className="text-headline font-semibold leading-tight">{r.name}</h3>
+                  {r.circuit?.name && (
+                    <p className="text-caption-1 text-label-secondary">{r.circuit.name}</p>
+                  )}
+                  {raceDate && (
+                    <div className="flex items-center gap-1.5 text-caption-1 text-label-tertiary">
+                      <Calendar className="h-3 w-3" />
+                      {raceDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2 pt-1">
+                    {isPast ? (
+                      <Link
+                        to={`/race-story/${year}/${r.round}`}
+                        className="inline-flex items-center gap-1 text-caption-1 font-medium text-label-primary hover:text-f1-red transition-colors"
+                      >
+                        View Race Story
+                        <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+                      </Link>
+                    ) : (
+                      <span className="text-caption-1 text-label-quaternary">Upcoming</span>
+                    )}
+                    {isPast && (
+                      <button
+                        onClick={() => { setRound(r.round); setView('detail') }}
+                        className="text-caption-1 text-label-tertiary hover:text-label-primary transition-colors ml-auto"
+                      >
+                        Detailed Analysis
+                      </button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Detailed Race Analysis */}
+      {races.length > 0 && view === 'detail' && (
         <>
           {/* Race summary card — always visible */}
           <RaceSummaryCard year={year} round={round} />
@@ -157,7 +239,7 @@ export default function History() {
                 Sprint Weekend
               </Badge>
               {selectedRace?.sprint_date && (
-                <span className="text-f1-muted">
+                <span className="text-label-tertiary">
                   Sprint: {new Date(selectedRace.sprint_date).toLocaleDateString()}
                 </span>
               )}
@@ -166,7 +248,7 @@ export default function History() {
 
           {/* Tabbed content */}
           <Tabs value={tab} onValueChange={setTab}>
-            <TabsList className="bg-f1-card border border-f1-border w-fit flex-wrap">
+            <TabsList className="w-fit flex-wrap">
               <TabsTrigger value="results">Race</TabsTrigger>
               <TabsTrigger value="qualifying">Qualifying</TabsTrigger>
               {hasFastF1 && (
@@ -277,7 +359,7 @@ function ResultsTable({ results }) {
   const sorted = [...results].sort((a, b) => (a.position || 99) - (b.position || 99))
 
   if (!sorted.length) {
-    return <div className="text-f1-muted text-center py-8">No results data</div>
+    return <div className="text-label-tertiary text-center py-8">No results data</div>
   }
 
   const winner = sorted[0]
@@ -297,7 +379,7 @@ function ResultsTable({ results }) {
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-f1-border text-f1-muted text-[10px] tracking-wider uppercase">
+          <tr className="border-b border-glass-border text-label-tertiary text-[10px] tracking-wider uppercase">
             <th className="py-2 px-2 text-left w-10">POS</th>
             <th className="py-2 px-2 text-left">DRIVER</th>
             <th className="py-2 px-2 text-left">TEAM</th>
@@ -330,7 +412,7 @@ function ResultsTable({ results }) {
             return (
               <tr
                 key={pos}
-                className={`border-b border-f1-border/20 hover:bg-black/[0.04] transition-colors team-stripe ${
+                className={`border-b border-glass-border/50 hover:bg-black/[0.04] transition-colors team-stripe ${
                   isDNF ? 'opacity-50' : ''
                 }`}
                 style={{ '--stripe-color': teamColor }}
@@ -346,7 +428,7 @@ function ResultsTable({ results }) {
                 <td className="py-1.5 px-2">
                   <div className="flex items-center gap-1.5">
                     <span className="font-bold text-xs font-mono">{code}</span>
-                    <span className="text-f1-muted text-xs hidden sm:inline">
+                    <span className="text-label-tertiary text-xs hidden sm:inline">
                       {formatDriverName(code, fullName)}
                     </span>
                   </div>
@@ -354,7 +436,7 @@ function ResultsTable({ results }) {
                 <td className="py-1.5 px-2">
                   <div className="flex items-center gap-1.5">
                     <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: teamColor }} />
-                    <span className="text-xs text-f1-muted">{constructor}</span>
+                    <span className="text-xs text-label-tertiary">{constructor}</span>
                   </div>
                 </td>
                 <td className="py-1.5 px-2 text-center">
@@ -364,7 +446,7 @@ function ResultsTable({ results }) {
                     </span>
                   )}
                 </td>
-                <td className="py-1.5 px-2 text-right font-mono text-xs text-f1-muted">
+                <td className="py-1.5 px-2 text-right font-mono text-xs text-label-tertiary">
                   {r.grid || '-'}
                 </td>
                 <td className="py-1.5 px-2 text-right font-mono font-semibold">
@@ -387,7 +469,7 @@ function ResultsTable({ results }) {
                     {status.label}
                   </span>
                   {status.reason && (
-                    <span className="text-[10px] text-f1-muted ml-1">{status.reason}</span>
+                    <span className="text-[10px] text-label-tertiary ml-1">{status.reason}</span>
                   )}
                 </td>
               </tr>
@@ -428,12 +510,12 @@ function QualifyingTable({ results, qualFormat = 'KNOCKOUT' }) {
     return (
       <div className="space-y-3">
         {fmtInfo && (
-          <div className="flex items-start gap-2 px-3 py-2 rounded bg-black/[0.03] border border-f1-border text-xs">
+          <div className="flex items-start gap-2 px-3 py-2 rounded bg-black/[0.03] border border-glass-border text-xs">
             <span style={{ color: fmtInfo.color }} className="font-semibold shrink-0">{fmtInfo.label}:</span>
-            <span className="text-f1-muted">{fmtInfo.note}</span>
+            <span className="text-label-tertiary">{fmtInfo.note}</span>
           </div>
         )}
-        <div className="text-f1-muted text-center py-8">No qualifying data</div>
+        <div className="text-label-tertiary text-center py-8">No qualifying data</div>
       </div>
     )
   }
@@ -443,13 +525,13 @@ function QualifyingTable({ results, qualFormat = 'KNOCKOUT' }) {
   return (
     <div className="overflow-x-auto">
       {fmtInfo && (
-        <div className="flex items-start gap-2 px-3 py-2 mb-2 rounded bg-black/[0.03] border border-f1-border text-xs">
+        <div className="flex items-start gap-2 px-3 py-2 mb-2 rounded bg-black/[0.03] border border-glass-border text-xs">
           <span style={{ color: fmtInfo.color }} className="font-semibold shrink-0">{fmtInfo.label}:</span>
-          <span className="text-f1-muted">{fmtInfo.note}</span>
+          <span className="text-label-tertiary">{fmtInfo.note}</span>
         </div>
       )}
       {qualFormat === 'KNOCKOUT' && (
-      <div className="flex items-center gap-4 px-2 pb-2 text-[10px] text-f1-muted">
+      <div className="flex items-center gap-4 px-2 pb-2 text-[10px] text-label-tertiary">
         <span>Eliminated:</span>
         <span className="flex items-center gap-1">
           <span className="w-2 h-2 rounded-sm bg-red-500/30" />Q1 (P16-20)
@@ -462,7 +544,7 @@ function QualifyingTable({ results, qualFormat = 'KNOCKOUT' }) {
 
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-f1-border text-f1-muted text-[10px] tracking-wider uppercase">
+          <tr className="border-b border-glass-border text-label-tertiary text-[10px] tracking-wider uppercase">
             <th className="py-2 px-2 text-left w-10">POS</th>
             <th className="py-2 px-2 text-left">DRIVER</th>
             <th className="py-2 px-2 text-left">TEAM</th>
@@ -491,7 +573,7 @@ function QualifyingTable({ results, qualFormat = 'KNOCKOUT' }) {
             return (
               <tr
                 key={pos}
-                className={`border-b border-f1-border/20 hover:bg-black/[0.04] transition-colors team-stripe ${rowTint}`}
+                className={`border-b border-glass-border/50 hover:bg-black/[0.04] transition-colors team-stripe ${rowTint}`}
                 style={{ '--stripe-color': teamColor }}
               >
                 <td className="py-1.5 px-2">
@@ -505,7 +587,7 @@ function QualifyingTable({ results, qualFormat = 'KNOCKOUT' }) {
                 <td className="py-1.5 px-2">
                   <div className="flex items-center gap-1.5">
                     <span className="font-bold text-xs font-mono">{code}</span>
-                    <span className="text-f1-muted text-xs hidden sm:inline">
+                    <span className="text-label-tertiary text-xs hidden sm:inline">
                       {formatDriverName(code, fullName)}
                     </span>
                   </div>
@@ -513,7 +595,7 @@ function QualifyingTable({ results, qualFormat = 'KNOCKOUT' }) {
                 <td className="py-1.5 px-2">
                   <div className="flex items-center gap-1.5">
                     <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: teamColor }} />
-                    <span className="text-xs text-f1-muted">{constructor}</span>
+                    <span className="text-xs text-label-tertiary">{constructor}</span>
                   </div>
                 </td>
                 <td className="py-1.5 px-2 text-right font-mono text-xs">
@@ -522,14 +604,14 @@ function QualifyingTable({ results, qualFormat = 'KNOCKOUT' }) {
                 {showQ2Q3 && (
                   <td className="py-1.5 px-2 text-right font-mono text-xs">
                     {r.q2 ? formatLapTime(r.q2) : (
-                      <span className={eliminatedQ1 ? 'text-f1-muted/40' : ''}>-</span>
+                      <span className={eliminatedQ1 ? 'text-label-tertiary/40' : ''}>-</span>
                     )}
                   </td>
                 )}
                 {showQ2Q3 && (
                   <td className="py-1.5 px-2 text-right font-mono text-xs">
                     {r.q3 ? formatLapTime(r.q3) : (
-                      <span className={eliminatedQ1 || eliminatedQ2 ? 'text-f1-muted/40' : ''}>-</span>
+                      <span className={eliminatedQ1 || eliminatedQ2 ? 'text-label-tertiary/40' : ''}>-</span>
                     )}
                   </td>
                 )}
@@ -554,7 +636,7 @@ function SprintResultsTable({ results }) {
 
   if (!sorted.length) {
     return (
-      <div className="text-f1-muted text-center py-8">
+      <div className="text-label-tertiary text-center py-8">
         No sprint race data — Jolpica may not have synced this yet.
       </div>
     )
@@ -562,13 +644,13 @@ function SprintResultsTable({ results }) {
 
   return (
     <div className="overflow-x-auto">
-      <div className="flex items-center gap-2 px-2 pb-2 text-[10px] text-f1-muted">
+      <div className="flex items-center gap-2 px-2 pb-2 text-[10px] text-label-tertiary">
         <span className="px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400 font-semibold">SPRINT</span>
         <span>Points awarded to top 8 (8-7-6-5-4-3-2-1)</span>
       </div>
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-f1-border text-f1-muted text-[10px] tracking-wider uppercase">
+          <tr className="border-b border-glass-border text-label-tertiary text-[10px] tracking-wider uppercase">
             <th className="py-2 px-2 text-left w-10">POS</th>
             <th className="py-2 px-2 text-left">DRIVER</th>
             <th className="py-2 px-2 text-left">TEAM</th>
@@ -591,7 +673,7 @@ function SprintResultsTable({ results }) {
             return (
               <tr
                 key={pos}
-                className={`border-b border-f1-border/20 hover:bg-black/[0.04] transition-colors team-stripe ${
+                className={`border-b border-glass-border/50 hover:bg-black/[0.04] transition-colors team-stripe ${
                   isDNF ? 'opacity-50' : ''
                 }`}
                 style={{ '--stripe-color': teamColor }}
@@ -607,7 +689,7 @@ function SprintResultsTable({ results }) {
                 <td className="py-1.5 px-2">
                   <div className="flex items-center gap-1.5">
                     <span className="font-bold text-xs font-mono">{code}</span>
-                    <span className="text-f1-muted text-xs hidden sm:inline">
+                    <span className="text-label-tertiary text-xs hidden sm:inline">
                       {formatDriverName(code, fullName)}
                     </span>
                   </div>
@@ -615,10 +697,10 @@ function SprintResultsTable({ results }) {
                 <td className="py-1.5 px-2">
                   <div className="flex items-center gap-1.5">
                     <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: teamColor }} />
-                    <span className="text-xs text-f1-muted">{constructor}</span>
+                    <span className="text-xs text-label-tertiary">{constructor}</span>
                   </div>
                 </td>
-                <td className="py-1.5 px-2 text-right font-mono text-xs text-f1-muted">
+                <td className="py-1.5 px-2 text-right font-mono text-xs text-label-tertiary">
                   {r.grid || '-'}
                 </td>
                 <td className="py-1.5 px-2 text-right font-mono font-semibold">
@@ -629,7 +711,7 @@ function SprintResultsTable({ results }) {
                     {status.label}
                   </span>
                   {status.reason && (
-                    <span className="text-[10px] text-f1-muted ml-1">{status.reason}</span>
+                    <span className="text-[10px] text-label-tertiary ml-1">{status.reason}</span>
                   )}
                 </td>
               </tr>
@@ -648,7 +730,7 @@ function SprintShootoutTable({ results }) {
 
   if (!sorted.length) {
     return (
-      <div className="text-f1-muted text-center py-8">
+      <div className="text-label-tertiary text-center py-8">
         No sprint qualifying data available — Jolpica does not expose a dedicated sprint qualifying
         endpoint. This data will be populated via FastF1 in a future update.
       </div>
@@ -660,13 +742,13 @@ function SprintShootoutTable({ results }) {
 
   return (
     <div className="overflow-x-auto">
-      <div className="flex items-center gap-2 px-2 pb-2 text-[10px] text-f1-muted">
+      <div className="flex items-center gap-2 px-2 pb-2 text-[10px] text-label-tertiary">
         <span className="px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400 font-semibold">SPRINT QUALIFYING</span>
         <span>{hasSQ3 ? 'SQ1 / SQ2 / SQ3 knockout format (2023+)' : 'Single-phase sprint qualifying (2021–2022)'}</span>
       </div>
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-f1-border text-f1-muted text-[10px] tracking-wider uppercase">
+          <tr className="border-b border-glass-border text-label-tertiary text-[10px] tracking-wider uppercase">
             <th className="py-2 px-2 text-left w-10">POS</th>
             <th className="py-2 px-2 text-left">DRIVER</th>
             <th className="py-2 px-2 text-left">TEAM</th>
@@ -690,7 +772,7 @@ function SprintShootoutTable({ results }) {
             return (
               <tr
                 key={pos}
-                className={`border-b border-f1-border/20 hover:bg-black/[0.04] transition-colors team-stripe ${rowTint}`}
+                className={`border-b border-glass-border/50 hover:bg-black/[0.04] transition-colors team-stripe ${rowTint}`}
                 style={{ '--stripe-color': teamColor }}
               >
                 <td className="py-1.5 px-2">
@@ -704,7 +786,7 @@ function SprintShootoutTable({ results }) {
                 <td className="py-1.5 px-2">
                   <div className="flex items-center gap-1.5">
                     <span className="font-bold text-xs font-mono">{code}</span>
-                    <span className="text-f1-muted text-xs hidden sm:inline">
+                    <span className="text-label-tertiary text-xs hidden sm:inline">
                       {formatDriverName(code, fullName)}
                     </span>
                   </div>
@@ -712,7 +794,7 @@ function SprintShootoutTable({ results }) {
                 <td className="py-1.5 px-2">
                   <div className="flex items-center gap-1.5">
                     <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: teamColor }} />
-                    <span className="text-xs text-f1-muted">{constructor}</span>
+                    <span className="text-xs text-label-tertiary">{constructor}</span>
                   </div>
                 </td>
                 <td className="py-1.5 px-2 text-right font-mono text-xs">
@@ -721,14 +803,14 @@ function SprintShootoutTable({ results }) {
                 {hasSQ2 && (
                   <td className="py-1.5 px-2 text-right font-mono text-xs">
                     {r.sq2 ? formatLapTime(r.sq2) : (
-                      <span className={eliminatedSQ1 ? 'text-f1-muted/40' : ''}>-</span>
+                      <span className={eliminatedSQ1 ? 'text-label-tertiary/40' : ''}>-</span>
                     )}
                   </td>
                 )}
                 {hasSQ3 && (
                   <td className="py-1.5 px-2 text-right font-mono text-xs">
                     {r.sq3 ? formatLapTime(r.sq3) : (
-                      <span className={eliminatedSQ1 || eliminatedSQ2 ? 'text-f1-muted/40' : ''}>-</span>
+                      <span className={eliminatedSQ1 || eliminatedSQ2 ? 'text-label-tertiary/40' : ''}>-</span>
                     )}
                   </td>
                 )}
@@ -745,7 +827,7 @@ function SprintShootoutTable({ results }) {
 
 function PitStopsTable({ stops }) {
   if (!stops.length) {
-    return <div className="text-f1-muted text-center py-8">No pit stop data</div>
+    return <div className="text-label-tertiary text-center py-8">No pit stop data</div>
   }
 
   const sorted = [...stops].sort((a, b) => (a.lap || 0) - (b.lap || 0))
@@ -765,34 +847,34 @@ function PitStopsTable({ stops }) {
   return (
     <div className="overflow-x-auto">
       {durations.length > 0 && (
-        <div className="flex flex-wrap gap-4 px-3 py-2 mb-3 rounded bg-black/[0.03] border border-f1-border text-xs">
+        <div className="flex flex-wrap gap-4 px-3 py-2 mb-3 rounded bg-black/[0.03] border border-glass-border text-xs">
           <div className="flex items-center gap-2">
-            <span className="text-f1-muted uppercase tracking-wider text-[10px]">Fastest</span>
+            <span className="text-label-tertiary uppercase tracking-wider text-[10px]">Fastest</span>
             <span className="font-mono font-bold text-[#4ade80]">{fastest.toFixed(1)}s</span>
             {fastestStop && (
-              <span className="font-mono text-f1-muted">{fastestStop.driver?.code || fastestStop._driver_code || ''}</span>
+              <span className="font-mono text-label-tertiary">{fastestStop.driver?.code || fastestStop._driver_code || ''}</span>
             )}
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-f1-muted uppercase tracking-wider text-[10px]">Average</span>
+            <span className="text-label-tertiary uppercase tracking-wider text-[10px]">Average</span>
             <span className="font-mono font-bold text-[#eab308]">{average.toFixed(1)}s</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-f1-muted uppercase tracking-wider text-[10px]">Slowest</span>
+            <span className="text-label-tertiary uppercase tracking-wider text-[10px]">Slowest</span>
             <span className="font-mono font-bold text-[#ef4444]">{slowest.toFixed(1)}s</span>
             {slowestStop && (
-              <span className="font-mono text-f1-muted">{slowestStop.driver?.code || slowestStop._driver_code || ''}</span>
+              <span className="font-mono text-label-tertiary">{slowestStop.driver?.code || slowestStop._driver_code || ''}</span>
             )}
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-f1-muted uppercase tracking-wider text-[10px]">Total Stops</span>
+            <span className="text-label-tertiary uppercase tracking-wider text-[10px]">Total Stops</span>
             <span className="font-mono font-bold">{durations.length}</span>
           </div>
         </div>
       )}
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-f1-border text-f1-muted text-[10px] tracking-wider uppercase">
+          <tr className="border-b border-glass-border text-label-tertiary text-[10px] tracking-wider uppercase">
             <th className="py-2 px-2 text-left">DRIVER</th>
             <th className="py-2 px-2 text-right w-14">STOP</th>
             <th className="py-2 px-2 text-right w-14">LAP</th>
@@ -812,14 +894,14 @@ function PitStopsTable({ stops }) {
             return (
               <tr
                 key={i}
-                className="border-b border-f1-border/20 hover:bg-black/[0.04] transition-colors team-stripe"
+                className="border-b border-glass-border/50 hover:bg-black/[0.04] transition-colors team-stripe"
                 style={{ '--stripe-color': teamColor }}
               >
                 <td className="py-1.5 px-2">
                   <div className="flex items-center gap-1.5">
                     <span className="font-bold text-xs font-mono">{code}</span>
                     {fullName && (
-                      <span className="text-f1-muted text-xs hidden sm:inline">
+                      <span className="text-label-tertiary text-xs hidden sm:inline">
                         {formatDriverName(code, fullName)}
                       </span>
                     )}
@@ -831,7 +913,7 @@ function PitStopsTable({ stops }) {
                   {pit.text}
                 </td>
                 <td className="py-1.5 px-2">
-                  <div className="flex-1 bg-f1-border rounded-full h-2 overflow-hidden">
+                  <div className="flex-1 bg-glass-border rounded-full h-2 overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all"
                       style={{
@@ -879,7 +961,7 @@ function PositionChart({ laps }) {
   }, [laps])
 
   if (!laps || !laps.length) {
-    return <div className="text-f1-muted text-center py-8">No lap position data</div>
+    return <div className="text-label-tertiary text-center py-8">No lap position data</div>
   }
 
   const maxLap = laps[laps.length - 1]?.lap || 1
@@ -888,22 +970,16 @@ function PositionChart({ laps }) {
   return (
     <Plot
       data={traces}
-      layout={{
-        autosize: true,
+      layout={getPlotlyGlassLayout({
         height: 500,
         margin: { t: 30, r: 20, b: 50, l: 50 },
-        paper_bgcolor: 'transparent',
-        plot_bgcolor: 'transparent',
-        font: { color: '#6B7280', family: 'ui-monospace, monospace', size: 11 },
         xaxis: {
-          title: 'Lap',
-          gridcolor: '#E2E5EA',
+          title: { text: 'Lap' },
           range: [1, maxLap],
           dtick: Math.ceil(maxLap / 15),
         },
         yaxis: {
-          title: 'Position',
-          gridcolor: '#E2E5EA',
+          title: { text: 'Position' },
           autorange: 'reversed',
           range: [0.5, maxPos + 0.5],
           dtick: 1,
@@ -915,7 +991,7 @@ function PositionChart({ laps }) {
           y: -0.15,
           font: { size: 9 },
         },
-      }}
+      })}
       config={{ displayModeBar: false, responsive: true }}
       useResizeHandler
       className="w-full"

@@ -4,21 +4,22 @@ import { cn } from '@/lib/utils'
 import { cva } from 'class-variance-authority'
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex items-center justify-center whitespace-nowrap rounded-xl text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
-        default: 'bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[var(--primary)]/90',
+        default: 'bg-label-primary text-white hover:bg-label-primary/90',
         destructive: 'bg-[var(--destructive)] text-[var(--destructive-foreground)] hover:bg-[var(--destructive)]/90',
-        outline: 'border border-[var(--input)] bg-transparent hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]',
-        secondary: 'bg-[var(--secondary)] text-[var(--secondary-foreground)] hover:bg-[var(--secondary)]/80',
-        ghost: 'hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]',
-        link: 'text-[var(--primary)] underline-offset-4 hover:underline',
+        outline: 'border border-glass-border bg-transparent hover:bg-black/[0.04] hover:text-label-primary',
+        secondary: 'bg-black/[0.04] text-label-primary hover:bg-black/[0.06]',
+        ghost: 'hover:bg-black/[0.04] hover:text-label-primary',
+        link: 'text-label-primary underline-offset-4 hover:underline',
+        glass: 'glass hover:shadow-md',
       },
       size: {
         default: 'h-9 px-4 py-2',
-        sm: 'h-8 rounded-md px-3 text-xs',
-        lg: 'h-10 rounded-md px-8',
+        sm: 'h-8 rounded-lg px-3 text-xs',
+        lg: 'h-10 rounded-xl px-8',
         icon: 'h-9 w-9',
       },
     },

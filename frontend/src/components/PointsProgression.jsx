@@ -49,26 +49,36 @@ export default function PointsProgression({ year }) {
     const l = {
       paper_bgcolor: 'transparent',
       plot_bgcolor: 'transparent',
-      font: { color: '#1A1A2E', family: 'ui-monospace, monospace', size: 11 },
+      font: { color: '#1d1d1f', family: 'Inter, system-ui, sans-serif', size: 11 },
       xaxis: {
-        title: { text: 'Round', font: { size: 11 } },
-        gridcolor: '#E2E5EA',
+        title: { text: 'Round', font: { size: 11, color: '#86868b' } },
+        gridcolor: 'rgba(0,0,0,0.06)',
         tickvals: roundNums,
         ticktext: roundNames,
         tickangle: -45,
-        tickfont: { size: 9 },
+        tickfont: { size: 9, color: '#aeaeb2' },
+        linecolor: 'rgba(0,0,0,0.06)',
+        zerolinecolor: 'rgba(0,0,0,0.06)',
       },
       yaxis: {
-        title: { text: 'Points', font: { size: 11 } },
-        gridcolor: '#E2E5EA',
+        title: { text: 'Points', font: { size: 11, color: '#86868b' } },
+        gridcolor: 'rgba(0,0,0,0.06)',
+        tickfont: { color: '#aeaeb2' },
+        linecolor: 'rgba(0,0,0,0.06)',
+        zerolinecolor: 'rgba(0,0,0,0.06)',
       },
       margin: { t: 10, r: 10, b: 80, l: 50 },
       legend: {
         orientation: 'h',
         y: -0.35,
-        font: { size: 10 },
+        font: { size: 10, color: '#86868b' },
       },
       hovermode: 'x unified',
+      hoverlabel: {
+        bgcolor: 'rgba(255,255,255,0.92)',
+        bordercolor: 'rgba(0,0,0,0.08)',
+        font: { family: 'Inter, system-ui, sans-serif', size: 11, color: '#1d1d1f' },
+      },
       height: 350,
     }
 
@@ -77,7 +87,7 @@ export default function PointsProgression({ year }) {
 
   if (loading) return <LoadingSpinner />
   if (!data?.rounds?.length) {
-    return <p className="text-sm text-f1-muted text-center py-4">No standings progression data available</p>
+    return <p className="text-footnote text-label-tertiary text-center py-4">No standings progression data available</p>
   }
 
   return (

@@ -64,17 +64,17 @@ export default function RaceMap() {
       <PageHeader title="Track Map & Telemetry" subtitle={circuitTitle || undefined}>
         <div className="flex gap-2">
           <select value={year} onChange={e => setYear(Number(e.target.value))}
-            className="bg-f1-card border border-f1-border rounded px-3 py-1.5 text-sm">
+            className="bg-glass-bg border border-glass-border rounded-lg px-3 py-1.5 text-sm">
             {yearList.map(y => <option key={y} value={y}>{y}</option>)}
           </select>
           <select value={round} onChange={e => setRound(Number(e.target.value))}
-            className="bg-f1-card border border-f1-border rounded px-3 py-1.5 text-sm">
+            className="bg-glass-bg border border-glass-border rounded-lg px-3 py-1.5 text-sm">
             {races.map(r => (
               <option key={r.round} value={r.round}>R{r.round} — {r.name}</option>
             ))}
           </select>
           <select value={session} onChange={e => setSession(e.target.value)}
-            className="bg-f1-card border border-f1-border rounded px-3 py-1.5 text-sm">
+            className="bg-glass-bg border border-glass-border rounded-lg px-3 py-1.5 text-sm">
             {SESSIONS.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
@@ -92,7 +92,7 @@ export default function RaceMap() {
               className={`flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-full border transition-colors ${
                 isSelected
                   ? 'border-transparent text-white'
-                  : 'border-f1-border text-f1-muted hover:text-f1-text'
+                  : 'border-glass-border text-label-tertiary hover:text-label-primary'
               }`}
               style={isSelected ? { backgroundColor: teamColor } : {}}
             >
@@ -105,7 +105,7 @@ export default function RaceMap() {
           )
         })}
         {driverColors.length === 0 && (
-          <div className="text-f1-muted text-sm">Select a session to see available drivers</div>
+          <div className="text-label-tertiary text-sm">Select a session to see available drivers</div>
         )}
       </div>
 
@@ -114,11 +114,11 @@ export default function RaceMap() {
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm flex items-center gap-2">
-                <MapPin className="h-3.5 w-3.5 text-f1-muted" />
+                <MapPin className="h-3.5 w-3.5 text-label-tertiary" />
                 Circuit Map
               </CardTitle>
               <select value={colorMode} onChange={e => setColorMode(e.target.value)}
-                className="bg-white border border-f1-border rounded px-2 py-1 text-xs">
+                className="bg-glass-bg border border-glass-border rounded-lg px-2 py-1 text-xs">
                 <option value="speed">Speed</option>
                 <option value="throttle">Throttle</option>
                 <option value="brake">Brake</option>
@@ -143,7 +143,7 @@ export default function RaceMap() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2">
-                <Activity className="h-3.5 w-3.5 text-f1-muted" />
+                <Activity className="h-3.5 w-3.5 text-label-tertiary" />
                 Speed Trace
               </CardTitle>
             </CardHeader>
@@ -154,7 +154,7 @@ export default function RaceMap() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2">
-                <TrendingDown className="h-3.5 w-3.5 text-f1-muted" />
+                <TrendingDown className="h-3.5 w-3.5 text-label-tertiary" />
                 Lap Delta
               </CardTitle>
             </CardHeader>
@@ -165,7 +165,7 @@ export default function RaceMap() {
         </div>
       </div>
 
-      <p className="text-f1-muted text-xs text-center">
+      <p className="text-label-tertiary text-xs text-center">
         Telemetry data provided by FastF1. Data availability depends on session type and year.
       </p>
     </div>

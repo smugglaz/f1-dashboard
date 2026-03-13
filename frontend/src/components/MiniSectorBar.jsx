@@ -1,7 +1,7 @@
 import { SECTOR_COLORS, getSectorLabel } from '../utils/colors'
 
 export default function MiniSectorBar({ sectors = [] }) {
-  if (!sectors.length) return <span className="text-f1-muted text-xs">—</span>
+  if (!sectors.length) return <span className="text-label-tertiary text-xs">—</span>
 
   return (
     <div className="flex gap-0.5 justify-center">

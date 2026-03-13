@@ -1,4 +1,5 @@
 import Plot from 'react-plotly.js'
+import { getPlotlyGlassLayout } from '@/utils/chartTheme'
 
 export default function LiveTrackMap({ trackData, positions = [] }) {
   const traces = []
@@ -42,18 +43,16 @@ export default function LiveTrackMap({ trackData, positions = [] }) {
     <div>
       <Plot
         data={traces}
-        layout={{
-          paper_bgcolor: 'transparent',
-          plot_bgcolor: 'transparent',
+        layout={getPlotlyGlassLayout({
           margin: { l: 5, r: 5, t: 5, b: 5 },
           xaxis: { visible: false, scaleanchor: 'y' },
           yaxis: { visible: false },
           showlegend: false,
-        }}
+        })}
         config={{ responsive: true, displayModeBar: false }}
         style={{ width: '100%', height: '300px' }}
       />
-      <div className="text-f1-muted text-[10px] text-center mt-1">
+      <div className="text-label-tertiary text-[10px] text-center mt-1">
         Positions approximate — interpolated from sector data
       </div>
     </div>

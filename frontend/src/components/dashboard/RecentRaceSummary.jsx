@@ -1,9 +1,10 @@
+import { Link } from 'react-router-dom'
 import { useApi } from '@/hooks/useApi'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getTeamColor } from '@/utils/teams'
-import { Flag, AlertTriangle, CloudRain, Zap } from 'lucide-react'
+import { Flag, AlertTriangle, CloudRain, Zap, ArrowRight } from 'lucide-react'
 
 export default function RecentRaceSummary({ year, round }) {
   const { data, loading } = useApi(
@@ -29,26 +30,25 @@ export default function RecentRaceSummary({ year, round }) {
   const teamColor = getTeamColor(winner.constructor || '')
 
   return (
-    <Card className="relative overflow-hidden">
-      <div className="absolute top-0 left-0 right-0 h-1" style={{ backgroundColor: teamColor }} />
+    <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
-            <Flag className="h-4 w-4 text-f1-muted" />
+            <Flag className="h-4 w-4 text-label-tertiary" />
             Last Race
           </CardTitle>
-          <span className="text-xs text-f1-muted">Round {race.round}</span>
+          <span className="text-caption-2">Round {race.round}</span>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Winner */}
         <div>
-          <p className="text-xs text-f1-muted mb-1">{race.name}</p>
+          <p className="text-caption-1 mb-1">{race.name}</p>
           <div className="flex items-center gap-3">
             <div className="w-1.5 h-10 rounded-full" style={{ backgroundColor: teamColor }} />
             <div>
-              <div className="text-xl font-bold">{winner.name}</div>
-              <div className="text-sm text-f1-muted">
+              <div className="text-title-2">{winner.name}</div>
+              <div className="text-footnote">
                 {winner.constructor} &middot; from P{winner.grid}
               </div>
             </div>
@@ -59,16 +59,16 @@ export default function RecentRaceSummary({ year, round }) {
         <div className="flex items-center gap-4 text-xs">
           {second && (
             <div>
-              <span className="text-f1-muted">Margin: </span>
+              <span className="text-label-tertiary">Margin: </span>
               <span className="font-mono font-semibold">{margin || second.time}</span>
-              <span className="text-f1-muted"> to {second.code}</span>
+              <span className="text-label-tertiary"> to {second.code}</span>
             </div>
           )}
           {fastest_lap && (
             <div>
-              <span className="text-f1-muted">FL: </span>
-              <span className="font-mono text-purple-400">{fastest_lap.time}</span>
-              <span className="text-f1-muted"> ({fastest_lap.code})</span>
+              <span className="text-label-tertiary">FL: </span>
+              <span className="font-mono text-purple-600">{fastest_lap.time}</span>
+              <span className="text-label-tertiary"> ({fastest_lap.code})</span>
             </div>
           )}
         </div>
@@ -103,6 +103,15 @@ export default function RecentRaceSummary({ year, round }) {
             </Badge>
           )}
         </div>
+
+        {/* Race Story CTA */}
+        <Link
+          to={`/race-story/${year}/${round}`}
+          className="flex items-center gap-1.5 text-caption-1 text-label-tertiary hover:text-label-primary transition-colors group"
+        >
+          <span>View Race Story</span>
+          <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+        </Link>
       </CardContent>
     </Card>
   )

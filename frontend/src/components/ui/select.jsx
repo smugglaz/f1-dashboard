@@ -11,8 +11,8 @@ const SelectTrigger = forwardRef(({ className, children, ...props }, ref) => (
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      'flex h-9 w-full items-center justify-between rounded-md border border-[var(--input)] bg-transparent px-3 py-2 text-sm',
-      'placeholder:text-[var(--muted-foreground)]',
+      'flex h-9 w-full items-center justify-between rounded-xl border border-glass-border bg-white/60 px-3 py-2 text-sm',
+      'placeholder:text-label-tertiary',
       'focus:outline-none focus:ring-2 focus:ring-[var(--ring)]',
       'disabled:cursor-not-allowed disabled:opacity-50',
       '[&>span]:line-clamp-1',
@@ -22,7 +22,7 @@ const SelectTrigger = forwardRef(({ className, children, ...props }, ref) => (
   >
     {children}
     <SelectPrimitive.Icon asChild>
-      <ChevronDown className="h-4 w-4 opacity-50" />
+      <ChevronDown className="h-4 w-4 text-label-tertiary" />
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
 ))
@@ -33,7 +33,7 @@ const SelectContent = forwardRef(({ className, children, position = 'popper', ..
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
-        'relative z-50 max-h-72 min-w-[8rem] overflow-hidden rounded-md border border-[var(--border)] bg-[var(--popover)] text-[var(--popover-foreground)] shadow-md',
+        'relative z-50 max-h-72 min-w-[8rem] overflow-hidden rounded-xl glass-heavy text-label-primary shadow-lg',
         'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
         position === 'popper' && 'data-[side=bottom]:translate-y-1 data-[side=top]:-translate-y-1',
         className
@@ -58,8 +58,8 @@ const SelectItem = forwardRef(({ className, children, ...props }, ref) => (
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      'relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none',
-      'focus:bg-[var(--accent)] focus:text-[var(--accent-foreground)]',
+      'relative flex w-full cursor-default select-none items-center rounded-lg py-1.5 pl-8 pr-2 text-sm outline-none',
+      'focus:bg-black/[0.04] focus:text-label-primary',
       'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
       className
     )}

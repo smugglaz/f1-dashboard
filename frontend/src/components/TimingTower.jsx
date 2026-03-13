@@ -4,7 +4,7 @@ import MiniSectorBar from './MiniSectorBar'
 
 export default function TimingTower({ timing = [] }) {
   if (!timing.length) {
-    return <div className="text-f1-muted text-center py-8">No timing data available</div>
+    return <div className="text-label-tertiary text-center py-8">No timing data available</div>
   }
 
   const sorted = [...timing].sort((a, b) => (a.position || 99) - (b.position || 99))
@@ -12,7 +12,7 @@ export default function TimingTower({ timing = [] }) {
   return (
     <div className="overflow-x-auto">
       {/* Sector color legend */}
-      <div className="flex items-center gap-4 px-2 pb-2 text-[10px] text-f1-muted">
+      <div className="flex items-center gap-4 px-2 pb-2 text-[10px] text-label-tertiary">
         <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm" style={{ backgroundColor: '#AB47BC' }} />Best</span>
         <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm" style={{ backgroundColor: '#4CAF50' }} />PB</span>
         <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm" style={{ backgroundColor: '#FDD835' }} />Slower</span>
@@ -20,7 +20,7 @@ export default function TimingTower({ timing = [] }) {
 
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-f1-border text-f1-muted text-[10px] tracking-wider uppercase">
+          <tr className="border-b border-glass-border text-label-tertiary text-[10px] tracking-wider uppercase">
             <th className="py-2 px-2 text-left w-10">POS</th>
             <th className="py-2 px-2 text-left">DRIVER</th>
             <th className="py-2 px-2 text-right">GAP</th>
@@ -47,7 +47,7 @@ export default function TimingTower({ timing = [] }) {
             return (
               <tr
                 key={drv.driver_number || abbr}
-                className="border-b border-f1-border/20 hover:bg-black/[0.04] transition-colors team-stripe"
+                className="border-b border-glass-border/50 hover:bg-black/[0.04] transition-colors team-stripe"
                 style={{ '--stripe-color': teamColor }}
               >
                 <td className="py-1.5 px-2">
@@ -59,11 +59,11 @@ export default function TimingTower({ timing = [] }) {
                 <td className="py-1.5 px-2">
                   <div className="flex items-center gap-1.5">
                     <span className="font-bold text-xs font-mono">{abbr}</span>
-                    {lastName && <span className="text-f1-muted text-xs hidden sm:inline">{lastName}</span>}
+                    {lastName && <span className="text-label-tertiary text-xs hidden sm:inline">{lastName}</span>}
                   </div>
                 </td>
                 <td className="py-1.5 px-2 text-right font-mono text-xs">
-                  {pos === 1 ? <span className="text-f1-muted text-[10px]">LEADER</span> : (drv.gap_to_leader ? formatInterval(drv.gap_to_leader) : '-')}
+                  {pos === 1 ? <span className="text-label-tertiary text-[10px]">LEADER</span> : (drv.gap_to_leader ? formatInterval(drv.gap_to_leader) : '-')}
                 </td>
                 <td className="py-1.5 px-2 text-right font-mono text-xs">
                   {pos === 1 ? '' : (drv.interval ? formatInterval(drv.interval) : '-')}
@@ -82,11 +82,11 @@ export default function TimingTower({ timing = [] }) {
                         title={`${compound}${tireAge !== '' ? ` — ${tireAge} laps` : ''}`}>
                         {compound[0]}
                       </span>
-                      {tireAge !== '' && <span className="text-[10px] text-f1-muted font-mono">{tireAge}</span>}
+                      {tireAge !== '' && <span className="text-[10px] text-label-tertiary font-mono">{tireAge}</span>}
                     </div>
                   ) : '-'}
                 </td>
-                <td className="py-1.5 px-2 text-right text-xs font-mono text-f1-muted">
+                <td className="py-1.5 px-2 text-right text-xs font-mono text-label-tertiary">
                   {stintNum > 1 ? stintNum - 1 : stintNum === 1 ? '0' : '-'}
                 </td>
                 <td className="py-1.5 px-2 text-right font-mono text-xs">{drv.lap_number ?? drv.laps ?? '-'}</td>

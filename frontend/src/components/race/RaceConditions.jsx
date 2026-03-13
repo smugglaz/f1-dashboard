@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { FlagBadge } from '@/components/ui/flag-badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, ComposedChart } from 'recharts'
+import { rechartsGlassTheme } from '@/utils/chartTheme'
 import { Cloud } from 'lucide-react'
 
 export default function RaceConditions({ year, round, session = 'Race' }) {
@@ -36,7 +37,7 @@ export default function RaceConditions({ year, round, session = 'Race' }) {
       <Card>
         <CardHeader><CardTitle className="flex items-center gap-2"><Cloud className="h-4 w-4" />Conditions</CardTitle></CardHeader>
         <CardContent>
-          <p className="text-sm text-f1-muted text-center py-4">
+          <p className="text-sm text-label-tertiary text-center py-4">
             No weather or race control data available. Requires FastF1 data (2018+ races).
           </p>
         </CardContent>
@@ -60,7 +61,7 @@ export default function RaceConditions({ year, round, session = 'Race' }) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Cloud className="h-4 w-4 text-f1-muted" />
+          <Cloud className="h-4 w-4 text-label-tertiary" />
           Conditions — {session}
         </CardTitle>
       </CardHeader>
@@ -68,20 +69,21 @@ export default function RaceConditions({ year, round, session = 'Race' }) {
         {/* Weather chart */}
         {chartData.length > 0 && (
           <div>
-            <p className="text-[10px] text-f1-muted uppercase tracking-wider mb-2">Temperature & Rainfall</p>
+            <p className="text-[10px] text-label-tertiary uppercase tracking-wider mb-2">Temperature & Rainfall</p>
             <ResponsiveContainer width="100%" height={200}>
               <ComposedChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E2E5EA" />
+                <CartesianGrid {...rechartsGlassTheme.grid} />
                 <XAxis
                   dataKey="time_min"
-                  label={{ value: 'Session Time (min)', position: 'insideBottom', offset: -5, style: { fill: '#9CA3AF', fontSize: 10 } }}
-                  stroke="#9CA3AF"
-                  tick={{ fill: '#9CA3AF', fontSize: 9 }}
+                  label={{ value: 'Session Time (min)', position: 'insideBottom', offset: -5, style: rechartsGlassTheme.label }}
+                  stroke={rechartsGlassTheme.axis.axisLine.stroke}
+                  tick={rechartsGlassTheme.axis.tick}
                 />
-                <YAxis yAxisId="temp" stroke="#9CA3AF" tick={{ fill: '#9CA3AF', fontSize: 9 }} />
+                <YAxis yAxisId="temp" stroke={rechartsGlassTheme.axis.axisLine.stroke} tick={rechartsGlassTheme.axis.tick} />
                 <YAxis yAxisId="rain" orientation="right" hide />
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #E2E5EA', borderRadius: 8, fontSize: 11 }}
+                  contentStyle={rechartsGlassTheme.tooltip.contentStyle}
+                  labelStyle={rechartsGlassTheme.tooltip.labelStyle}
                   labelFormatter={v => `${v} min`}
                 />
                 <Legend wrapperStyle={{ fontSize: 10 }} />
@@ -96,21 +98,21 @@ export default function RaceConditions({ year, round, session = 'Race' }) {
         {/* Race control feed */}
         {keyMessages.length > 0 && (
           <div>
-            <p className="text-[10px] text-f1-muted uppercase tracking-wider mb-2">Race Control Messages</p>
+            <p className="text-[10px] text-label-tertiary uppercase tracking-wider mb-2">Race Control Messages</p>
             <div className="max-h-64 overflow-y-auto space-y-1 pr-1">
               {keyMessages.map((m, i) => {
                 const mins = m.time_s != null ? Math.floor(m.time_s / 60) : null
                 return (
-                  <div key={i} className="flex items-start gap-2 py-1 border-b border-f1-border/10 last:border-0">
-                    <span className="text-[10px] font-mono text-f1-muted w-12 shrink-0 text-right">
+                  <div key={i} className="flex items-start gap-2 py-1 border-b border-glass-border/10 last:border-0">
+                    <span className="text-[10px] font-mono text-label-tertiary w-12 shrink-0 text-right">
                       {mins != null ? `${mins}m` : ''}
                     </span>
                     {m.flag && <FlagBadge flag={m.flag} className="shrink-0" />}
-                    <span className="text-xs text-f1-text flex-1">
+                    <span className="text-xs text-label-primary flex-1">
                       {m.message}
-                      {m.driver && <span className="text-f1-muted ml-1">({m.driver})</span>}
+                      {m.driver && <span className="text-label-tertiary ml-1">({m.driver})</span>}
                     </span>
-                    {m.lap && <span className="text-[10px] text-f1-muted">L{m.lap}</span>}
+                    {m.lap && <span className="text-[10px] text-label-tertiary">L{m.lap}</span>}
                   </div>
                 )
               })}

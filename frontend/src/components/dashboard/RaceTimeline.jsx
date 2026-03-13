@@ -1,10 +1,16 @@
 import { useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { getTeamColor } from '@/utils/teams'
 import { ChevronRight } from 'lucide-react'
 
-export default function RaceTimeline({ races }) {
+function Wrapper({ to, children, className }) {
+  if (to) return <Link to={to} className={`no-underline ${className}`}>{children}</Link>
+  return <div className={className}>{children}</div>
+}
+
+export default function RaceTimeline({ races, year }) {
   const { lastRace, nextRace, afterNext } = useMemo(() => {
     if (!races?.length) return {}
     const now = new Date()
@@ -34,33 +40,35 @@ export default function RaceTimeline({ races }) {
 
         return (
           <div key={i} className="flex items-stretch gap-2 flex-1">
-            <Card className={`flex-1 ${isNext ? 'ring-1 ring-f1-red/50' : ''}`}>
-              <CardContent className="p-3">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[10px] text-f1-muted uppercase tracking-wider">{item.label}</span>
-                  <Badge variant={isNext ? 'default' : 'outline'} className="text-[9px] px-1.5 py-0">
-                    R{r.round}
-                  </Badge>
-                  {r.has_sprint && (
-                    <Badge variant="warning" className="text-[9px] px-1.5 py-0">Sprint</Badge>
-                  )}
-                </div>
-                <p className="text-sm font-semibold truncate">{r.name?.replace(' Grand Prix', ' GP')}</p>
-                <p className="text-xs text-f1-muted truncate">{r.circuit?.name}</p>
-                {r.winner ? (
-                  <div className="flex items-center gap-1.5 mt-1.5">
-                    <div className="w-1 h-4 rounded-full" style={{ backgroundColor: teamColor || '#555' }} />
-                    <span className="text-xs font-mono font-bold">{r.winner.code}</span>
+            <Wrapper to={r.winner && year ? `/race-story/${year}/${r.round}` : null} className="flex-1">
+              <Card className={`flex-1 ${isNext ? 'ring-1 ring-label-primary/10' : ''} ${r.winner ? 'hover:shadow-md transition-shadow cursor-pointer' : ''}`}>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-caption-2 uppercase tracking-wider">{item.label}</span>
+                    <Badge variant={isNext ? 'default' : 'outline'} className="text-[9px] px-1.5 py-0">
+                      R{r.round}
+                    </Badge>
+                    {r.has_sprint && (
+                      <Badge variant="warning" className="text-[9px] px-1.5 py-0">Sprint</Badge>
+                    )}
                   </div>
-                ) : (
-                  <p className="text-xs text-f1-muted mt-1.5 font-mono">
-                    {r.date ? new Date(r.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '—'}
-                  </p>
-                )}
-              </CardContent>
-            </Card>
+                  <p className="text-sm font-semibold truncate">{r.name?.replace(' Grand Prix', ' GP')}</p>
+                  <p className="text-caption-1 truncate">{r.circuit?.name}</p>
+                  {r.winner ? (
+                    <div className="flex items-center gap-1.5 mt-2">
+                      <div className="w-1 h-4 rounded-full" style={{ backgroundColor: teamColor || '#555' }} />
+                      <span className="text-xs font-mono font-bold">{r.winner.code}</span>
+                    </div>
+                  ) : (
+                    <p className="text-caption-1 mt-2 font-mono">
+                      {r.date ? new Date(r.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '\u2014'}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            </Wrapper>
             {i < items.length - 1 && (
-              <div className="flex items-center text-f1-border">
+              <div className="flex items-center text-label-quaternary">
                 <ChevronRight className="h-4 w-4" />
               </div>
             )}

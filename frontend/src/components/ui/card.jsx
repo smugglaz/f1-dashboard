@@ -4,7 +4,7 @@ function Card({ className, ...props }) {
   return (
     <div
       className={cn(
-        'rounded-lg border border-[var(--border)] bg-[var(--card)] text-[var(--card-foreground)]',
+        'rounded-2xl glass text-[var(--card-foreground)]',
         className
       )}
       {...props}
@@ -15,7 +15,7 @@ function Card({ className, ...props }) {
 function CardHeader({ className, ...props }) {
   return (
     <div
-      className={cn('flex flex-col space-y-1.5 p-4', className)}
+      className={cn('flex flex-col space-y-1.5 p-5 pb-3', className)}
       {...props}
     />
   )
@@ -24,7 +24,7 @@ function CardHeader({ className, ...props }) {
 function CardTitle({ className, ...props }) {
   return (
     <h3
-      className={cn('text-sm font-medium leading-none tracking-tight text-f1-muted uppercase', className)}
+      className={cn('text-footnote font-medium tracking-tight text-label-secondary', className)}
       {...props}
     />
   )
@@ -33,7 +33,7 @@ function CardTitle({ className, ...props }) {
 function CardDescription({ className, ...props }) {
   return (
     <p
-      className={cn('text-sm text-[var(--muted-foreground)]', className)}
+      className={cn('text-caption-1 text-label-tertiary', className)}
       {...props}
     />
   )
@@ -41,14 +41,14 @@ function CardDescription({ className, ...props }) {
 
 function CardContent({ className, ...props }) {
   return (
-    <div className={cn('p-4 pt-0', className)} {...props} />
+    <div className={cn('px-5 pb-5 pt-0', className)} {...props} />
   )
 }
 
 function CardFooter({ className, ...props }) {
   return (
     <div
-      className={cn('flex items-center p-4 pt-0', className)}
+      className={cn('flex items-center px-5 pb-5 pt-0', className)}
       {...props}
     />
   )
