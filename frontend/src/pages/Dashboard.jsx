@@ -1,6 +1,9 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useApi } from '../hooks/useApi'
 import StandingsTable from '../components/StandingsTable'
+import PointsProgression from '../components/PointsProgression'
+import TeammateComparison from '../components/TeammateComparison'
+import DriverStatsCard from '../components/DriverStatsCard'
 import LoadingSpinner from '../components/LoadingSpinner'
 import { formatCountdown } from '../utils/format'
 import { getTeamColor } from '../utils/teams'
@@ -8,6 +11,7 @@ import { getTeamColor } from '../utils/teams'
 export default function Dashboard() {
   const currentYear = new Date().getFullYear()
   const [year, setYear] = useState(currentYear)
+  const [selectedDriver, setSelectedDriver] = useState(null)
   const { data: seasonsData } = useApi('/api/historical/seasons')
   const { data: driverData, loading: loadingD } = useApi(`/api/historical/standings/drivers/${year}`)
   const { data: constructorData, loading: loadingC } = useApi(`/api/historical/standings/constructors/${year}`)
@@ -111,6 +115,44 @@ export default function Dashboard() {
             <StandingsTable data={constructorStandings} type="constructor" />
           )}
         </div>
+      </div>
+
+      {/* Championship Points Progression */}
+      <div className="bg-f1-card rounded-lg p-4 border border-f1-border">
+        <h2 className="text-lg font-semibold mb-3">Championship Progression — {year}</h2>
+        <PointsProgression year={year} />
+      </div>
+
+      {/* Driver Season Stats */}
+      {driverStandings.length > 0 && (
+        <div className="bg-f1-card rounded-lg p-4 border border-f1-border">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg font-semibold">Driver Season Stats</h2>
+            <select
+              value={selectedDriver || ''}
+              onChange={e => setSelectedDriver(e.target.value || null)}
+              className="bg-f1-dark border border-f1-border rounded px-2 py-1 text-xs"
+            >
+              <option value="">Select driver...</option>
+              {driverStandings.map(s => (
+                <option key={s.driver.id} value={s.driver.id}>
+                  {s.driver.code} — {s.driver.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          {selectedDriver ? (
+            <DriverStatsCard year={year} driverId={selectedDriver} />
+          ) : (
+            <p className="text-sm text-f1-muted text-center py-3">Select a driver to view season statistics</p>
+          )}
+        </div>
+      )}
+
+      {/* Teammate Comparison */}
+      <div className="bg-f1-card rounded-lg p-4 border border-f1-border">
+        <h2 className="text-lg font-semibold mb-3">Teammate Comparison — {year}</h2>
+        <TeammateComparison year={year} />
       </div>
 
       {/* Race Calendar with winners */}

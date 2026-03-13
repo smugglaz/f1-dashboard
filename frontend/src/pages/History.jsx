@@ -1,12 +1,14 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useApi, fetchApi } from '../hooks/useApi'
 import LoadingSpinner from '../components/LoadingSpinner'
 import {
   formatLapTime, parseLapTime, formatDriverName,
   formatPositionChange, formatStatus, formatPitDuration,
+  qualTimeToMs, formatPercentDelta,
 } from '../utils/format'
 import { getPositionColor } from '../utils/colors'
 import { getTeamColor } from '../utils/teams'
+import Plot from 'react-plotly.js'
 
 export default function History() {
   const currentYear = new Date().getFullYear()
@@ -36,6 +38,9 @@ export default function History() {
   const { data: sprintQualData, loading: loadingSprintQual } = useApi(
     tab === 'sprint-qualifying' && hasSprint ? `/api/historical/sprint-qualifying/${year}/${round}` : null
   )
+  const { data: lapPosData, loading: loadingLapPos } = useApi(
+    tab === 'positions' ? `/api/historical/lap-positions/${year}/${round}` : null
+  )
 
   const raceInfo = raceDetailData?.race
   const results = raceDetailData?.results || []
@@ -43,6 +48,7 @@ export default function History() {
   const pitStops = pitData?.stops || []
   const sprintResults = sprintData?.results || []
   const sprintQualResults = sprintQualData?.results || []
+  const lapPositions = lapPosData?.laps || []
 
   useEffect(() => { setRound(1); setSyncError(null) }, [year])
 
@@ -92,6 +98,7 @@ export default function History() {
       { id: 'sprint', label: 'Sprint Race' },
       { id: 'sprint-qualifying', label: 'Sprint Qualifying' },
     ] : []),
+    { id: 'positions', label: 'Position Chart' },
   ]
 
   // If we switch round and the new round has no sprint, reset sprint tabs
@@ -215,6 +222,9 @@ export default function History() {
             {tab === 'sprint-qualifying' && hasSprint && (
               loadingSprintQual ? <LoadingSpinner /> : <SprintShootoutTable results={sprintQualResults} />
             )}
+            {tab === 'positions' && (
+              loadingLapPos ? <LoadingSpinner /> : <PositionChart laps={lapPositions} />
+            )}
           </div>
         </>
       )}
@@ -230,6 +240,10 @@ function ResultsTable({ results }) {
   if (!sorted.length) {
     return <div className="text-f1-muted text-center py-8">No results data</div>
   }
+
+  // Winner's time for gap % computation
+  const winner = sorted[0]
+  const winnerMs = winner?.time_millis ? parseFloat(winner.time_millis) : null
 
   // Find fastest lap for purple highlight
   let fastestTime = Infinity
@@ -255,6 +269,7 @@ function ResultsTable({ results }) {
             <th className="py-2 px-2 text-center w-12">+/−</th>
             <th className="py-2 px-2 text-right">GRID</th>
             <th className="py-2 px-2 text-right">PTS</th>
+            {winnerMs && <th className="py-2 px-2 text-right">GAP %</th>}
             <th className="py-2 px-2 text-right">FASTEST</th>
             <th className="py-2 px-2 text-left">STATUS</th>
           </tr>
@@ -272,6 +287,11 @@ function ResultsTable({ results }) {
             const fl = r.fastest_lap_time ? formatLapTime(r.fastest_lap_time) : null
             const isFastestLap = fastestDriver && r === fastestDriver
             const isDNF = status.label === 'DNF' || status.label === 'DSQ' || status.label === 'DNS'
+
+            // Gap to winner %
+            const driverMs = r.time_millis ? parseFloat(r.time_millis) : null
+            const raceGapPct = (winnerMs && driverMs && pos > 1) ? ((driverMs - winnerMs) / winnerMs) * 100 : null
+            const raceGapFmt = pos === 1 ? { text: 'WINNER', color: '#FFD700' } : formatPercentDelta(raceGapPct)
 
             return (
               <tr
@@ -328,6 +348,13 @@ function ResultsTable({ results }) {
                   {r.points ?? '-'}
                 </td>
 
+                {/* Gap to winner */}
+                {winnerMs && (
+                  <td className="py-1.5 px-2 text-right font-mono text-xs font-semibold" style={{ color: raceGapFmt.color }}>
+                    {raceGapFmt.text}
+                  </td>
+                )}
+
                 {/* Fastest lap */}
                 <td className="py-1.5 px-2 text-right font-mono text-xs">
                   {fl ? (
@@ -374,6 +401,12 @@ const QUAL_FORMAT_INFO = {
 function QualifyingTable({ results, qualFormat = 'KNOCKOUT' }) {
   const sorted = [...results].sort((a, b) => (a.position || 99) - (b.position || 99))
   const fmtInfo = QUAL_FORMAT_INFO[qualFormat] || null
+
+  // Compute pole time (P1's best Q session: Q3 → Q2 → Q1)
+  const poleDriver = sorted[0]
+  const poleMs = poleDriver
+    ? qualTimeToMs(poleDriver.q3) || qualTimeToMs(poleDriver.q2) || qualTimeToMs(poleDriver.q1)
+    : null
 
   if (!sorted.length) {
     return (
@@ -423,6 +456,7 @@ function QualifyingTable({ results, qualFormat = 'KNOCKOUT' }) {
             <th className="py-2 px-2 text-right">Q1</th>
             {showQ2Q3 && <th className="py-2 px-2 text-right">Q2</th>}
             {showQ2Q3 && <th className="py-2 px-2 text-right">Q3</th>}
+            {poleMs && <th className="py-2 px-2 text-right">GAP %</th>}
           </tr>
         </thead>
         <tbody>
@@ -436,6 +470,11 @@ function QualifyingTable({ results, qualFormat = 'KNOCKOUT' }) {
             const eliminatedQ1 = showQ2Q3 && pos >= 16
             const eliminatedQ2 = showQ2Q3 && pos >= 11 && pos <= 15
             const rowTint = eliminatedQ1 ? 'bg-red-500/5' : eliminatedQ2 ? 'bg-yellow-500/5' : ''
+
+            // Gap to pole %
+            const driverMs = qualTimeToMs(r.q3) || qualTimeToMs(r.q2) || qualTimeToMs(r.q1)
+            const gapPct = (poleMs && driverMs) ? ((driverMs - poleMs) / poleMs) * 100 : null
+            const gapFmt = pos === 1 ? { text: 'POLE', color: '#FFD700' } : formatPercentDelta(gapPct)
 
             return (
               <tr
@@ -480,6 +519,11 @@ function QualifyingTable({ results, qualFormat = 'KNOCKOUT' }) {
                     {r.q3 ? formatLapTime(r.q3) : (
                       <span className={eliminatedQ1 || eliminatedQ2 ? 'text-f1-muted/40' : ''}>-</span>
                     )}
+                  </td>
+                )}
+                {poleMs && (
+                  <td className="py-1.5 px-2 text-right font-mono text-xs font-semibold" style={{ color: gapFmt.color }}>
+                    {gapFmt.text}
                   </td>
                 )}
               </tr>
@@ -702,8 +746,43 @@ function PitStopsTable({ stops }) {
     return !isNaN(d) && d > max ? d : max
   }, 0)
 
+  // Summary stats
+  const durations = sorted.map(s => parseFloat(s.duration)).filter(d => !isNaN(d) && d > 0)
+  const fastest = durations.length ? Math.min(...durations) : null
+  const slowest = durations.length ? Math.max(...durations) : null
+  const average = durations.length ? durations.reduce((a, b) => a + b, 0) / durations.length : null
+  const fastestStop = fastest !== null ? sorted.find(s => parseFloat(s.duration) === fastest) : null
+  const slowestStop = slowest !== null ? sorted.find(s => parseFloat(s.duration) === slowest) : null
+
   return (
     <div className="overflow-x-auto">
+      {/* Summary bar */}
+      {durations.length > 0 && (
+        <div className="flex flex-wrap gap-4 px-3 py-2 mb-3 rounded bg-white/5 border border-f1-border text-xs">
+          <div className="flex items-center gap-2">
+            <span className="text-f1-muted uppercase tracking-wider text-[10px]">Fastest</span>
+            <span className="font-mono font-bold text-[#4ade80]">{fastest.toFixed(1)}s</span>
+            {fastestStop && (
+              <span className="font-mono text-f1-muted">{fastestStop.driver?.code || fastestStop._driver_code || ''}</span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-f1-muted uppercase tracking-wider text-[10px]">Average</span>
+            <span className="font-mono font-bold text-[#eab308]">{average.toFixed(1)}s</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-f1-muted uppercase tracking-wider text-[10px]">Slowest</span>
+            <span className="font-mono font-bold text-[#ef4444]">{slowest.toFixed(1)}s</span>
+            {slowestStop && (
+              <span className="font-mono text-f1-muted">{slowestStop.driver?.code || slowestStop._driver_code || ''}</span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-f1-muted uppercase tracking-wider text-[10px]">Total Stops</span>
+            <span className="font-mono font-bold">{durations.length}</span>
+          </div>
+        </div>
+      )}
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-f1-border text-f1-muted text-[10px] tracking-wider uppercase">
@@ -761,5 +840,79 @@ function PitStopsTable({ stops }) {
         </tbody>
       </table>
     </div>
+  )
+}
+
+/* ─── Position Chart ──────────────────────────────────────── */
+
+function PositionChart({ laps }) {
+  const traces = useMemo(() => {
+    if (!laps || !laps.length) return []
+
+    // Build per-driver position arrays
+    const drivers = {}
+    for (const lap of laps) {
+      for (const d of (lap.drivers || [])) {
+        if (!drivers[d.code]) {
+          drivers[d.code] = { code: d.code, constructor: d.constructor || '', x: [], y: [] }
+        }
+        drivers[d.code].x.push(lap.lap)
+        drivers[d.code].y.push(d.position)
+      }
+    }
+
+    return Object.values(drivers).map(d => ({
+      x: d.x,
+      y: d.y,
+      name: d.code,
+      type: 'scatter',
+      mode: 'lines',
+      line: { color: getTeamColor(d.constructor), width: 2 },
+      hovertemplate: `Lap %{x}: ${d.code} P%{y}<extra></extra>`,
+    }))
+  }, [laps])
+
+  if (!laps || !laps.length) {
+    return <div className="text-f1-muted text-center py-8">No lap position data</div>
+  }
+
+  const maxLap = laps[laps.length - 1]?.lap || 1
+  const maxPos = Math.max(20, ...traces.flatMap(t => t.y))
+
+  return (
+    <Plot
+      data={traces}
+      layout={{
+        autosize: true,
+        height: 500,
+        margin: { t: 30, r: 20, b: 50, l: 50 },
+        paper_bgcolor: 'transparent',
+        plot_bgcolor: 'transparent',
+        font: { color: '#A0A0B8', family: 'ui-monospace, monospace', size: 11 },
+        xaxis: {
+          title: 'Lap',
+          gridcolor: '#2A2A3E',
+          range: [1, maxLap],
+          dtick: Math.ceil(maxLap / 15),
+        },
+        yaxis: {
+          title: 'Position',
+          gridcolor: '#2A2A3E',
+          autorange: 'reversed',
+          range: [0.5, maxPos + 0.5],
+          dtick: 1,
+        },
+        hovermode: 'x unified',
+        showlegend: true,
+        legend: {
+          orientation: 'h',
+          y: -0.15,
+          font: { size: 9 },
+        },
+      }}
+      config={{ displayModeBar: false, responsive: true }}
+      useResizeHandler
+      className="w-full"
+    />
   )
 }

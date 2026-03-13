@@ -125,3 +125,52 @@ export function formatCountdown(targetDate) {
   if (hours > 0) return `${hours}h ${mins}m`
   return `${mins}m`
 }
+
+/**
+ * Parse a qualifying time string ("1:23.456") into milliseconds.
+ * Handles "M:SS.mmm", "SS.mmm", and pandas Timedelta formats.
+ * Returns null if unparseable or empty.
+ */
+export function qualTimeToMs(timeStr) {
+  if (!timeStr) return null
+  const s = String(timeStr).trim()
+  if (!s) return null
+  // Match M:SS.mmm
+  const mssMatch = s.match(/^(\d+):(\d{1,2})\.(\d{1,3})$/)
+  if (mssMatch) {
+    const mins = parseInt(mssMatch[1])
+    const secs = parseInt(mssMatch[2])
+    const ms = mssMatch[3].padEnd(3, '0')
+    return mins * 60000 + secs * 1000 + parseInt(ms)
+  }
+  // Match SS.mmm (no minutes)
+  const ssMatch = s.match(/^(\d{1,2})\.(\d{1,3})$/)
+  if (ssMatch) {
+    const secs = parseInt(ssMatch[1])
+    const ms = ssMatch[2].padEnd(3, '0')
+    return secs * 1000 + parseInt(ms)
+  }
+  // Match HH:MM:SS.microseconds (pandas Timedelta)
+  const tdMatch = s.match(/(\d+):(\d{2}):(\d{2})\.(\d+)/)
+  if (tdMatch) {
+    const hours = parseInt(tdMatch[1])
+    const mins = parseInt(tdMatch[2])
+    const secs = parseInt(tdMatch[3])
+    const ms = tdMatch[4].substring(0, 3).padEnd(3, '0')
+    return (hours * 3600 + mins * 60 + secs) * 1000 + parseInt(ms)
+  }
+  return null
+}
+
+/**
+ * Format a percentage delta with sign and semantic color.
+ * Returns { text: '+0.35%', color: '#4ade80' }
+ * Green: <0.3%, Yellow: 0.3-1.0%, Red: >1.0%
+ */
+export function formatPercentDelta(pct) {
+  if (pct === null || pct === undefined || isNaN(pct)) return { text: '-', color: '#8888AA' }
+  const abs = Math.abs(pct)
+  const color = abs < 0.3 ? '#4ade80' : abs < 1.0 ? '#eab308' : '#ef4444'
+  const sign = pct > 0 ? '+' : ''
+  return { text: `${sign}${pct.toFixed(3)}%`, color }
+}
