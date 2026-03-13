@@ -317,6 +317,18 @@ class DataSyncManager:
                     models.Race.year == year,
                     models.Race.round == round_num,
                 ).first()
+                # Detect sprint from calendar data
+                # Jolpica uses nested objects: Sprint: {date, time}, SprintQualifying: {date, time}
+                # or flat fields: SprintDate, SprintTime (older format)
+                sprint_obj = race_data.get("Sprint", {})
+                sprint_date_str = sprint_obj.get("date", "") or race_data.get("SprintDate", "")
+                sprint_time_str = sprint_obj.get("time", "") or race_data.get("SprintTime", "")
+                sprint_qual_obj = race_data.get("SprintQualifying", {})
+                sprint_qual_date_str = sprint_qual_obj.get("date", "")
+                qual_obj = race_data.get("Qualifying", {})
+                qual_date_str = qual_obj.get("date", "")
+                is_sprint_weekend = bool(sprint_date_str) and year >= 2021
+
                 if not race:
                     race = models.Race(
                         year=year,
@@ -327,7 +339,9 @@ class DataSyncManager:
                         time=race_data.get("time", ""),
                         url=race_data.get("url", ""),
                         qualifying_format=qf,
-                        has_sprint=False,
+                        has_sprint=is_sprint_weekend,
+                        sprint_date=sprint_date_str or None,
+                        sprint_time=sprint_time_str or None,
                     )
                     db.add(race)
                 else:
@@ -335,135 +349,151 @@ class DataSyncManager:
                     race.date = race_data.get("date", race.date)
                     race.time = race_data.get("time", race.time)
                     race.qualifying_format = qf
+                    # Update sprint info from calendar even for future rounds
+                    if is_sprint_weekend:
+                        race.has_sprint = True
+                        race.sprint_date = sprint_date_str
+                        race.sprint_time = sprint_time_str or race.sprint_time
                 db.flush()
 
-                # Skip future rounds — no results exist yet
+                # Granular date guard: skip each data type based on when it happens
                 race_date_str = race_data.get("date", "")
-                if race_date_str > date.today().isoformat():
+                today_str = date.today().isoformat()
+                race_in_future = race_date_str > today_str
+
+                # For sprint weekends, events happen across multiple days:
+                #   Sprint Qualifying: typically Friday (sprint_qual_date_str)
+                #   Sprint Race: typically Saturday (sprint_date_str)
+                #   Regular Qualifying: also Saturday for sprint weekends
+                #   Race: Sunday (race_date_str)
+                # We allow syncing qualifying/sprint data if any pre-race event date has passed.
+                sprint_qual_date_past = sprint_qual_date_str and sprint_qual_date_str <= today_str
+                sprint_date_past = sprint_date_str and sprint_date_str <= today_str
+                any_event_past = sprint_qual_date_past or sprint_date_past
+
+                if race_in_future and not any_event_past:
                     logger.debug(f"Skipping future round {year} R{round_num} ({race_date_str})")
                     continue
 
-                # 2. Sync race results
-                try:
-                    results = await self.jolpica.get_race_results(year, round_num)
-                    await asyncio.sleep(RATE_DELAY)
-                    for r in results:
-                        driver = _get_or_create_driver(db, r.get("Driver", {}))
-                        constructor = _get_or_create_constructor(db, r.get("Constructor", {}))
+                # 2. Sync race results (only if race day has passed)
+                if not race_in_future:
+                    try:
+                        results = await self.jolpica.get_race_results(year, round_num)
+                        await asyncio.sleep(RATE_DELAY)
+                        for r in results:
+                            driver = _get_or_create_driver(db, r.get("Driver", {}))
+                            constructor = _get_or_create_constructor(db, r.get("Constructor", {}))
 
-                        existing = db.query(models.RaceResult).filter(
-                            models.RaceResult.race_id == race.id,
-                            models.RaceResult.driver_id == driver.id,
-                        ).first()
+                            existing = db.query(models.RaceResult).filter(
+                                models.RaceResult.race_id == race.id,
+                                models.RaceResult.driver_id == driver.id,
+                            ).first()
 
-                        pos = r.get("position")
-                        pos_int = int(pos) if pos and str(pos).isdigit() else None
-                        time_data = r.get("Time", {})
-                        fl = r.get("FastestLap", {})
+                            pos = r.get("position")
+                            pos_int = int(pos) if pos and str(pos).isdigit() else None
+                            time_data = r.get("Time", {})
+                            fl = r.get("FastestLap", {})
 
-                        values = dict(
-                            grid=int(r.get("grid", 0)),
-                            position=pos_int,
-                            position_text=r.get("positionText", ""),
-                            points=float(r.get("points", 0)),
-                            laps=int(r.get("laps", 0)),
-                            status=r.get("status", ""),
-                            time_text=time_data.get("time", ""),
-                            time_millis=int(time_data["millis"]) if time_data.get("millis") else None,
-                            fastest_lap_rank=int(fl.get("rank", 0)) if fl.get("rank") else None,
-                            fastest_lap_time=fl.get("Time", {}).get("time", ""),
-                            fastest_lap_speed=fl.get("AverageSpeed", {}).get("speed", ""),
-                        )
+                            values = dict(
+                                grid=int(r.get("grid", 0)),
+                                position=pos_int,
+                                position_text=r.get("positionText", ""),
+                                points=float(r.get("points", 0)),
+                                laps=int(r.get("laps", 0)),
+                                status=r.get("status", ""),
+                                time_text=time_data.get("time", ""),
+                                time_millis=int(time_data["millis"]) if time_data.get("millis") else None,
+                                fastest_lap_rank=int(fl.get("rank", 0)) if fl.get("rank") else None,
+                                fastest_lap_time=fl.get("Time", {}).get("time", ""),
+                                fastest_lap_speed=fl.get("AverageSpeed", {}).get("speed", ""),
+                            )
 
-                        if existing:
-                            for k, v in values.items():
-                                setattr(existing, k, v)
-                        else:
-                            db.add(models.RaceResult(
-                                race_id=race.id,
-                                driver_id=driver.id,
-                                constructor_id=constructor.id,
-                                **values,
-                            ))
-                except Exception as e:
-                    logger.debug(f"No results for {year} R{round_num}: {e}")
+                            if existing:
+                                for k, v in values.items():
+                                    setattr(existing, k, v)
+                            else:
+                                db.add(models.RaceResult(
+                                    race_id=race.id,
+                                    driver_id=driver.id,
+                                    constructor_id=constructor.id,
+                                    **values,
+                                ))
+                    except Exception as e:
+                        logger.debug(f"No results for {year} R{round_num}: {e}")
 
                 # 3. Sync qualifying (GP qualifying — sets Sunday grid)
-                try:
-                    quals = await self.jolpica.get_qualifying(year, round_num)
-                    await asyncio.sleep(RATE_DELAY)
-                    for q in quals:
-                        driver = _get_or_create_driver(db, q.get("Driver", {}))
-                        constructor = _get_or_create_constructor(db, q.get("Constructor", {}))
+                # Only fetch if qualifying date has passed (or no date info = always try for past races)
+                qual_date_past = not qual_date_str or qual_date_str <= today_str
+                if qual_date_past:
+                    try:
+                        quals = await self.jolpica.get_qualifying(year, round_num)
+                        await asyncio.sleep(RATE_DELAY)
+                        for q in quals:
+                            driver = _get_or_create_driver(db, q.get("Driver", {}))
+                            constructor = _get_or_create_constructor(db, q.get("Constructor", {}))
 
-                        existing = db.query(models.QualifyingResult).filter(
-                            models.QualifyingResult.race_id == race.id,
-                            models.QualifyingResult.driver_id == driver.id,
-                        ).first()
+                            existing = db.query(models.QualifyingResult).filter(
+                                models.QualifyingResult.race_id == race.id,
+                                models.QualifyingResult.driver_id == driver.id,
+                            ).first()
 
-                        values = dict(
-                            position=int(q.get("position", 0)),
-                            q1=q.get("Q1", ""),
-                            q2=q.get("Q2", ""),
-                            q3=q.get("Q3", ""),
-                        )
+                            values = dict(
+                                position=int(q.get("position", 0)),
+                                q1=q.get("Q1", ""),
+                                q2=q.get("Q2", ""),
+                                q3=q.get("Q3", ""),
+                            )
 
-                        if existing:
-                            for k, v in values.items():
-                                setattr(existing, k, v)
-                        else:
-                            db.add(models.QualifyingResult(
-                                race_id=race.id,
-                                driver_id=driver.id,
-                                constructor_id=constructor.id,
-                                **values,
-                            ))
-                except Exception as e:
-                    logger.debug(f"No qualifying for {year} R{round_num}: {e}")
+                            if existing:
+                                for k, v in values.items():
+                                    setattr(existing, k, v)
+                            else:
+                                db.add(models.QualifyingResult(
+                                    race_id=race.id,
+                                    driver_id=driver.id,
+                                    constructor_id=constructor.id,
+                                    **values,
+                                ))
+                    except Exception as e:
+                        logger.debug(f"No qualifying for {year} R{round_num}: {e}")
 
-                # 4. Sync pit stops (available 2011+)
-                try:
-                    stops = await self.jolpica.get_pit_stops(year, round_num)
-                    await asyncio.sleep(RATE_DELAY)
-                    for s in stops:
-                        did = s.get("driverId", "")
-                        driver = db.query(models.Driver).filter(models.Driver.driver_id == did).first()
-                        if not driver:
-                            continue
-                        stop_num = int(s.get("stop", 0))
+                # 4. Sync pit stops (available 2011+, only after race day)
+                if not race_in_future:
+                    try:
+                        stops = await self.jolpica.get_pit_stops(year, round_num)
+                        await asyncio.sleep(RATE_DELAY)
+                        for s in stops:
+                            did = s.get("driverId", "")
+                            driver = db.query(models.Driver).filter(models.Driver.driver_id == did).first()
+                            if not driver:
+                                continue
+                            stop_num = int(s.get("stop", 0))
 
-                        existing = db.query(models.PitStop).filter(
-                            models.PitStop.race_id == race.id,
-                            models.PitStop.driver_id == driver.id,
-                            models.PitStop.stop_number == stop_num,
-                        ).first()
+                            existing = db.query(models.PitStop).filter(
+                                models.PitStop.race_id == race.id,
+                                models.PitStop.driver_id == driver.id,
+                                models.PitStop.stop_number == stop_num,
+                            ).first()
 
-                        if not existing:
-                            db.add(models.PitStop(
-                                race_id=race.id,
-                                driver_id=driver.id,
-                                stop_number=stop_num,
-                                lap=int(s.get("lap", 0)),
-                                time_of_day=s.get("time", ""),
-                                duration=s.get("duration", ""),
-                            ))
-                except Exception as e:
-                    logger.debug(f"No pit stops for {year} R{round_num}: {e}")
+                            if not existing:
+                                db.add(models.PitStop(
+                                    race_id=race.id,
+                                    driver_id=driver.id,
+                                    stop_number=stop_num,
+                                    lap=int(s.get("lap", 0)),
+                                    time_of_day=s.get("time", ""),
+                                    duration=s.get("duration", ""),
+                                ))
+                    except Exception as e:
+                        logger.debug(f"No pit stops for {year} R{round_num}: {e}")
 
                 # 5. Sync sprint race results (2021+)
-                # We only query for sprint data in years where it exists.
-                # An empty response means this is a non-sprint round — handled silently.
-                if year >= 2021:
+                # Sprint race happens the day of sprint_date. Only fetch if that date has passed.
+                if year >= 2021 and is_sprint_weekend and sprint_date_past:
                     try:
                         sprint_results = await self.jolpica.get_sprint_results(year, round_num)
                         await asyncio.sleep(RATE_DELAY)
                         if sprint_results:
-                            race.has_sprint = True
-                            if race_data.get("SprintDate"):
-                                race.sprint_date = race_data["SprintDate"]
-                            if race_data.get("SprintTime"):
-                                race.sprint_time = race_data["SprintTime"]
-
                             for sr in sprint_results:
                                 driver = _get_or_create_driver(db, sr.get("Driver", {}))
                                 constructor = _get_or_create_constructor(db, sr.get("Constructor", {}))
