@@ -1,4 +1,4 @@
-import { useApi } from '@/hooks/useApi'
+import { useApiQuery } from '@/hooks/useApiQuery'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { TyreBadge } from '@/components/ui/tyre-badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -7,7 +7,7 @@ import { getTeamColor, getTeamName } from '@/utils/teams'
 import { Layers } from 'lucide-react'
 
 export default function StrategyTimeline({ year, round }) {
-  const { data, loading } = useApi(
+  const { data, loading } = useApiQuery(
     year && round ? `/api/historical/stints/${year}/${round}` : null
   )
 

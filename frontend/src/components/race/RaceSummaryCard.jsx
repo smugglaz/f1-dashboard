@@ -1,4 +1,4 @@
-import { useApi } from '@/hooks/useApi'
+import { useApiQuery } from '@/hooks/useApiQuery'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -7,10 +7,10 @@ import { getTeamColor, getTeamName } from '@/utils/teams'
 import { Trophy, MapPin, Thermometer } from 'lucide-react'
 
 export default function RaceSummaryCard({ year, round }) {
-  const { data: summary, loading: loadingSummary } = useApi(
+  const { data: summary, loading: loadingSummary } = useApiQuery(
     year && round ? `/api/historical/race-summary/${year}/${round}` : null
   )
-  const { data: circuitData, loading: loadingCircuit } = useApi(
+  const { data: circuitData, loading: loadingCircuit } = useApiQuery(
     year && round ? `/api/historical/circuit-info/${year}/${round}` : null
   )
 

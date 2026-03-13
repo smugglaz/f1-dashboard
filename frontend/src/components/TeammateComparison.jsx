@@ -1,4 +1,4 @@
-import { useApi } from '../hooks/useApi'
+import { useApiQuery } from '@/hooks/useApiQuery'
 import { getTeamColor } from '../utils/teams'
 import LoadingSpinner from './LoadingSpinner'
 
@@ -83,7 +83,7 @@ function TeamCard({ comparison }) {
 }
 
 export default function TeammateComparison({ year }) {
-  const { data, loading } = useApi(
+  const { data, loading } = useApiQuery(
     year ? `/api/historical/teammates/${year}` : null
   )
 

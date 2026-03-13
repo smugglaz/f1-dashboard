@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useApi } from '../hooks/useApi'
+import { useApiQuery } from '../hooks/useApiQuery'
 import NewsCard from '../components/NewsCard'
 
 import { Skeleton } from '@/components/ui/skeleton'
@@ -16,14 +16,9 @@ export default function News() {
   const [page, setPage] = useState(1)
 
   const endpoint = `/api/news?page=${page}&limit=20${source ? `&source=${source}` : ''}`
-  const { data, loading, error, refetch } = useApi(endpoint)
+  const { data, loading, error, refetch } = useApiQuery(endpoint, { refetchInterval: 60_000 })
 
   useEffect(() => { setPage(1) }, [source])
-
-  useEffect(() => {
-    const id = setInterval(refetch, 60000)
-    return () => clearInterval(id)
-  }, [refetch])
 
   const articles = data?.articles || data || []
   const total = data?.total ?? null

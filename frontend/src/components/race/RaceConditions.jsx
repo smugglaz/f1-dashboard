@@ -1,4 +1,4 @@
-import { useApi } from '@/hooks/useApi'
+import { useApiQuery } from '@/hooks/useApiQuery'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { FlagBadge } from '@/components/ui/flag-badge'
@@ -8,10 +8,10 @@ import { rechartsGlassTheme } from '@/utils/chartTheme'
 import { Cloud } from 'lucide-react'
 
 export default function RaceConditions({ year, round, session = 'Race' }) {
-  const { data: weatherData, loading: loadingWeather } = useApi(
+  const { data: weatherData, loading: loadingWeather } = useApiQuery(
     year && round ? `/api/historical/weather/${year}/${round}/${session}` : null
   )
-  const { data: rcData, loading: loadingRC } = useApi(
+  const { data: rcData, loading: loadingRC } = useApiQuery(
     year && round ? `/api/historical/race-control/${year}/${round}/${session}` : null
   )
 

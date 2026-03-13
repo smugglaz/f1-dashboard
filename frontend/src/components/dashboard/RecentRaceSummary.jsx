@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { useApi } from '@/hooks/useApi'
+import { useApiQuery } from '@/hooks/useApiQuery'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -7,7 +7,7 @@ import { getTeamColor, getTeamName } from '@/utils/teams'
 import { Flag, AlertTriangle, CloudRain, Zap, ArrowRight } from 'lucide-react'
 
 export default function RecentRaceSummary({ year, round }) {
-  const { data, loading } = useApi(
+  const { data, loading } = useApiQuery(
     year && round ? `/api/historical/race-summary/${year}/${round}` : null
   )
 

@@ -1,4 +1,4 @@
-import { useApi } from '@/hooks/useApi'
+import { useApiQuery } from '@/hooks/useApiQuery'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getTeamColor } from '@/utils/teams'
@@ -14,7 +14,7 @@ function msToTime(ms) {
 }
 
 export default function SectorAnalysis({ year, round, session = 'Qualifying' }) {
-  const { data, loading } = useApi(
+  const { data, loading } = useApiQuery(
     year && round ? `/api/historical/sectors/${year}/${round}/${session}` : null
   )
 

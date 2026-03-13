@@ -1,11 +1,11 @@
 import { useMemo } from 'react'
 import Plot from 'react-plotly.js'
-import { useApi } from '../hooks/useApi'
+import { useApiQuery } from '@/hooks/useApiQuery'
 import { getTeamColor, getTeamName } from '../utils/teams'
 import LoadingSpinner from './LoadingSpinner'
 
 export default function PointsProgression({ year }) {
-  const { data, loading } = useApi(
+  const { data, loading } = useApiQuery(
     year ? `/api/historical/standings/drivers/${year}/progression` : null
   )
 

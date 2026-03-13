@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useApi } from '@/hooks/useApi'
+import { useApiQuery } from '@/hooks/useApiQuery'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -7,7 +7,7 @@ import { formatCountdown } from '@/utils/format'
 import { Calendar, MapPin, Timer, Mountain } from 'lucide-react'
 
 export default function UpcomingRace({ year, round }) {
-  const { data, loading } = useApi(
+  const { data, loading } = useApiQuery(
     year && round ? `/api/historical/circuit-info/${year}/${round}` : null
   )
 

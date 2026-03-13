@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { useApi } from '../hooks/useApi'
+import { useApiQuery } from '../hooks/useApiQuery'
 import { useScrollReveal } from '@/hooks/useScrollReveal'
 import { PageHeader } from '@/components/ui/page-header'
 import { DataCard } from '@/components/ui/data-card'
@@ -29,10 +29,10 @@ export default function Dashboard() {
   const [year, setYear] = useState(currentYear)
   const [selectedDriver, setSelectedDriver] = useState(null)
 
-  const { data: seasonsData } = useApi('/api/historical/seasons')
-  const { data: driverData, loading: loadingD } = useApi(`/api/historical/standings/drivers/${year}`)
-  const { data: constructorData, loading: loadingC } = useApi(`/api/historical/standings/constructors/${year}`)
-  const { data: racesData, loading: loadingR } = useApi(`/api/historical/races/${year}`)
+  const { data: seasonsData } = useApiQuery('/api/historical/seasons')
+  const { data: driverData, loading: loadingD } = useApiQuery(`/api/historical/standings/drivers/${year}`)
+  const { data: constructorData, loading: loadingC } = useApiQuery(`/api/historical/standings/constructors/${year}`)
+  const { data: racesData, loading: loadingR } = useApiQuery(`/api/historical/races/${year}`)
 
   const driverStandings = driverData?.standings || []
   const constructorStandings = constructorData?.standings || []

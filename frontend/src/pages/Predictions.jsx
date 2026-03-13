@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useApi } from '../hooks/useApi'
+import { useApiQuery } from '../hooks/useApiQuery'
 import Plot from 'react-plotly.js'
 import { getTeamColor, getTeamName } from '../utils/teams'
 import { getPositionColor } from '../utils/colors'
@@ -14,8 +14,8 @@ import { Button } from '@/components/ui/button'
 import { Sparkles, Brain, BarChart3, AlertTriangle } from 'lucide-react'
 
 export default function Predictions() {
-  const { data: prediction, loading, error } = useApi('/api/predictions/next-race')
-  const { data: modelInfo } = useApi('/api/predictions/model-info')
+  const { data: prediction, loading, error } = useApiQuery('/api/predictions/next-race')
+  const { data: modelInfo } = useApiQuery('/api/predictions/model-info')
   const [showInfo, setShowInfo] = useState(false)
 
   if (loading) {

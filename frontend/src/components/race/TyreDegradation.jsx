@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useApi } from '@/hooks/useApi'
+import { useApiQuery } from '@/hooks/useApiQuery'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
@@ -17,7 +17,7 @@ function msToLapTime(ms) {
 }
 
 export default function TyreDegradation({ year, round }) {
-  const { data, loading } = useApi(
+  const { data, loading } = useApiQuery(
     year && round ? `/api/historical/tyre-performance/${year}/${round}` : null
   )
 

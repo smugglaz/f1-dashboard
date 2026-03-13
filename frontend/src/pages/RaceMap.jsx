@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { useApi, fetchApi } from '../hooks/useApi'
+import { useApiQuery } from '../hooks/useApiQuery'
+import { fetchApi } from '../hooks/useApi'
 import TrackMap from '../components/TrackMap'
 import TelemetryChart from '../components/TelemetryChart'
 import LapComparison from '../components/LapComparison'
@@ -23,9 +24,9 @@ export default function RaceMap() {
   const [telemetryData, setTelemetryData] = useState([])
   const [loadingTel, setLoadingTel] = useState(false)
 
-  const { data: racesData } = useApi(`/api/historical/races/${year}`)
+  const { data: racesData } = useApiQuery(`/api/historical/races/${year}`)
   const races = racesData?.races || []
-  const { data: circuit, loading: loadingCircuit } = useApi(`/api/historical/circuit/${year}/${round}`)
+  const { data: circuit, loading: loadingCircuit } = useApiQuery(`/api/historical/circuit/${year}/${round}`)
 
   useEffect(() => { setRound(1); setSelectedDrivers([]) }, [year])
   useEffect(() => { setSelectedDrivers([]) }, [round, session])

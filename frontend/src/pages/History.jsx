@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { useApi, fetchApi } from '../hooks/useApi'
+import { useApiQuery } from '../hooks/useApiQuery'
+import { fetchApi } from '../hooks/useApi'
+import { useQueryClient } from '@tanstack/react-query'
 import {
   formatLapTime, parseLapTime, formatDriverName,
   formatPositionChange, formatStatus, formatPitDuration,
@@ -35,12 +37,13 @@ export default function History() {
   const [syncing, setSyncing] = useState(false)
   const [syncError, setSyncError] = useState(null)
 
-  const { data: racesData, loading: loadingRaces, refetch: refetchRaces } = useApi(`/api/historical/races/${year}`)
-  const { data: raceDetailData, loading: loadingDetail } = useApi(`/api/historical/races/${year}/${round}`)
-  const { data: qualData, loading: loadingQual } = useApi(
+  const queryClient = useQueryClient()
+  const { data: racesData, loading: loadingRaces, refetch: refetchRaces } = useApiQuery(`/api/historical/races/${year}`)
+  const { data: raceDetailData, loading: loadingDetail } = useApiQuery(`/api/historical/races/${year}/${round}`)
+  const { data: qualData, loading: loadingQual } = useApiQuery(
     tab === 'qualifying' ? `/api/historical/qualifying/${year}/${round}` : null
   )
-  const { data: pitData, loading: loadingPits } = useApi(
+  const { data: pitData, loading: loadingPits } = useApiQuery(
     tab === 'pitstops' ? `/api/historical/pitstops/${year}/${round}` : null
   )
 
@@ -49,13 +52,13 @@ export default function History() {
   const hasSprint = selectedRace?.has_sprint ?? false
   const qualFormat = selectedRace?.qualifying_format || 'KNOCKOUT'
 
-  const { data: sprintData, loading: loadingSprint } = useApi(
+  const { data: sprintData, loading: loadingSprint } = useApiQuery(
     tab === 'sprint' && hasSprint ? `/api/historical/sprint/${year}/${round}` : null
   )
-  const { data: sprintQualData, loading: loadingSprintQual } = useApi(
+  const { data: sprintQualData, loading: loadingSprintQual } = useApiQuery(
     tab === 'sprint-qualifying' && hasSprint ? `/api/historical/sprint-qualifying/${year}/${round}` : null
   )
-  const { data: lapPosData, loading: loadingLapPos } = useApi(
+  const { data: lapPosData, loading: loadingLapPos } = useApiQuery(
     tab === 'positions' ? `/api/historical/lap-positions/${year}/${round}` : null
   )
 
@@ -98,8 +101,14 @@ export default function History() {
       clearInterval(window._f1SyncPoll)
       clearTimeout(window._f1SyncTimeout)
       setSyncing(false)
+      // Invalidate all cached historical data for this year
+      queryClient.invalidateQueries({
+        predicate: (query) =>
+          query.queryKey[0] === 'historical' &&
+          (query.queryKey.includes(year) || query.queryKey.includes(String(year)))
+      })
     }
-  }, [racesData, syncing])
+  }, [racesData, syncing, queryClient, year])
 
   // Pre-fetch race summaries for all past races (drama cues on cards)
   const [summaries, setSummaries] = useState({})

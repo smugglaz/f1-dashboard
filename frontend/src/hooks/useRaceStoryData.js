@@ -1,60 +1,47 @@
-import { useState, useEffect, useRef } from 'react'
+import { useQueries } from '@tanstack/react-query'
 import { fetchApi } from './useApi'
+import { cacheConfig } from '@/lib/queryClient'
 
 /**
- * Fires ~11 API calls in parallel to gather all data for a race story.
+ * Fires ~11 API calls in parallel via TanStack useQueries with caching.
+ * Historical race data is cached indefinitely — revisits are instant.
  * Returns { data, loading, error } where data contains all sections.
  */
 export function useRaceStoryData(year, round) {
-  const [state, setState] = useState({ data: null, loading: true, error: null })
-  const abortRef = useRef(null)
+  const enabled = !!(year && round)
 
-  useEffect(() => {
-    if (!year || !round) {
-      setState({ data: null, loading: false, error: null })
-      return
-    }
+  const endpointMap = {
+    race: `/api/historical/races/${year}/${round}`,
+    summary: `/api/historical/race-summary/${year}/${round}`,
+    qualifying: `/api/historical/qualifying/${year}/${round}`,
+    circuit: `/api/historical/circuit-info/${year}/${round}`,
+    stints: `/api/historical/stints/${year}/${round}`,
+    lapPositions: `/api/historical/lap-positions/${year}/${round}`,
+    pitStops: `/api/historical/pitstops/${year}/${round}`,
+    sectors: `/api/historical/sectors/${year}/${round}/Race`,
+    tyrePerf: `/api/historical/tyre-performance/${year}/${round}`,
+    weather: `/api/historical/weather/${year}/${round}/Race`,
+    raceControl: `/api/historical/race-control/${year}/${round}/Race`,
+  }
 
-    abortRef.current?.abort()
-    const controller = new AbortController()
-    abortRef.current = controller
+  const keys = Object.keys(endpointMap)
 
-    setState(s => ({ ...s, loading: true, error: null }))
+  const results = useQueries({
+    queries: keys.map((key) => ({
+      queryKey: ['historical', key, String(year), String(round)],
+      queryFn: ({ signal }) => fetchApi(endpointMap[key], { signal }),
+      enabled,
+      ...cacheConfig.historical,
+    })),
+  })
 
-    const endpoints = {
-      race: `/api/historical/races/${year}/${round}`,
-      summary: `/api/historical/race-summary/${year}/${round}`,
-      qualifying: `/api/historical/qualifying/${year}/${round}`,
-      circuit: `/api/historical/circuit-info/${year}/${round}`,
-      stints: `/api/historical/stints/${year}/${round}`,
-      lapPositions: `/api/historical/lap-positions/${year}/${round}`,
-      pitStops: `/api/historical/pitstops/${year}/${round}`,
-      sectors: `/api/historical/sectors/${year}/${round}/Race`,
-      tyrePerf: `/api/historical/tyre-performance/${year}/${round}`,
-      weather: `/api/historical/weather/${year}/${round}/Race`,
-      raceControl: `/api/historical/race-control/${year}/${round}/Race`,
-    }
+  const loading = results.some((r) => r.isLoading)
+  const error = results.find((r) => r.error)?.error?.message || null
 
-    const fetches = Object.entries(endpoints).map(async ([key, url]) => {
-      try {
-        const json = await fetchApi(url)
-        return [key, json]
-      } catch {
-        return [key, null]
-      }
-    })
+  const data =
+    loading
+      ? null
+      : Object.fromEntries(keys.map((key, i) => [key, results[i].data ?? null]))
 
-    Promise.all(fetches).then(results => {
-      if (controller.signal.aborted) return
-      const data = Object.fromEntries(results)
-      setState({ data, loading: false, error: null })
-    }).catch(err => {
-      if (controller.signal.aborted) return
-      setState({ data: null, loading: false, error: err.message })
-    })
-
-    return () => controller.abort()
-  }, [year, round])
-
-  return state
+  return { data, loading, error }
 }

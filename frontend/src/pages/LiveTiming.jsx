@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useApi } from '../hooks/useApi'
+import { useApiQuery } from '../hooks/useApiQuery'
 import { useWebSocket } from '../hooks/useWebSocket'
 import TimingTower from '../components/TimingTower'
 import WeatherWidget from '../components/WeatherWidget'
@@ -21,10 +21,10 @@ const SESSION_LABELS = {
 }
 
 export default function LiveTiming() {
-  const { data: sessionInfo, loading: loadingSession, refetch: refetchSession } = useApi('/api/live/session')
-  const { data: restTiming } = useApi('/api/live/timing')
-  const { data: weather, refetch: refetchWeather } = useApi('/api/live/weather')
-  const { data: raceControl, refetch: refetchRC } = useApi('/api/live/race-control')
+  const { data: sessionInfo, loading: loadingSession, refetch: refetchSession } = useApiQuery('/api/live/session')
+  const { data: restTiming } = useApiQuery('/api/live/timing')
+  const { data: weather, refetch: refetchWeather } = useApiQuery('/api/live/weather')
+  const { data: raceControl, refetch: refetchRC } = useApiQuery('/api/live/race-control')
 
   const [timing, setTiming] = useState([])
 

@@ -1,4 +1,4 @@
-import { useApi } from '../hooks/useApi'
+import { useApiQuery } from '@/hooks/useApiQuery'
 import { getTeamColor, getTeamName } from '../utils/teams'
 import LoadingSpinner from './LoadingSpinner'
 
@@ -14,7 +14,7 @@ function Stat({ label, value, highlight = false }) {
 }
 
 export default function DriverStatsCard({ year, driverId }) {
-  const { data, loading } = useApi(
+  const { data, loading } = useApiQuery(
     driverId ? `/api/historical/driver-stats/${year}/${driverId}` : null
   )
 
