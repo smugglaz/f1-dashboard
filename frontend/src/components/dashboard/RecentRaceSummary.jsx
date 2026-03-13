@@ -60,7 +60,7 @@ export default function RecentRaceSummary({ year, round }) {
           {second && (
             <div>
               <span className="text-label-tertiary">Margin: </span>
-              <span className="font-mono font-semibold">{margin || second.time}</span>
+              <span className="font-mono font-semibold">{second.time || margin}</span>
               <span className="text-label-tertiary"> to {second.code}</span>
             </div>
           )}

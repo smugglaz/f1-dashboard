@@ -109,7 +109,7 @@ export default function NumbersSection({ race, qualifying, pitStops }) {
                             <td className="py-2 px-2">
                               <div className="flex items-center gap-1.5">
                                 <div className="w-0.5 h-4 rounded-full" style={{ backgroundColor: teamColor }} />
-                                <span className="font-bold font-mono">{q.code || '-'}</span>
+                                <span className="font-bold font-mono">{q.code || q.driver?.code || '-'}</span>
                               </div>
                             </td>
                             <td className="py-2 px-2 text-right font-mono text-label-secondary">{q.q1 || '-'}</td>
@@ -143,7 +143,7 @@ export default function NumbersSection({ race, qualifying, pitStops }) {
                     <tbody>
                       {pits.slice(0, 40).map((p, i) => (
                         <tr key={i} className="border-b border-glass-border/50 hover:bg-black/[0.03]">
-                          <td className="py-2 px-2 font-mono font-bold">{p.driver_code || '-'}</td>
+                          <td className="py-2 px-2 font-mono font-bold">{p.driver_code || p.driver?.code || '-'}</td>
                           <td className="py-2 px-2 text-right font-mono text-label-secondary">{p.stop || '-'}</td>
                           <td className="py-2 px-2 text-right font-mono">{p.lap || '-'}</td>
                           <td className="py-2 px-2 text-right font-mono font-semibold">{p.duration || '-'}s</td>

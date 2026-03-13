@@ -28,9 +28,11 @@ export default function WinningPackageSection({ summary, sectors, tyrePerf, pitS
 
   // Pit stop comparison
   const pitComparison = useMemo(() => {
-    if (!pitStops?.pit_stops?.length) return null
-    const winnerStops = pitStops.pit_stops.filter(p => p.driver_code === winner.code)
-    const secondStops = second ? pitStops.pit_stops.filter(p => p.driver_code === second.code) : []
+    if (!(pitStops?.pit_stops?.length || pitStops?.stops?.length)) return null
+    const allStops = pitStops.pit_stops || pitStops.stops || []
+    const driverCode = (p) => p.driver_code || p.driver?.code || ''
+    const winnerStops = allStops.filter(p => driverCode(p) === winner.code)
+    const secondStops = second ? allStops.filter(p => driverCode(p) === second.code) : []
 
     const avgDuration = (stops) => {
       const durations = stops.map(s => parseFloat(s.duration)).filter(d => !isNaN(d) && d > 0)
@@ -162,7 +164,7 @@ export default function WinningPackageSection({ summary, sectors, tyrePerf, pitS
         <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-purple-500/8">
           <span className="text-caption-2 uppercase tracking-wider text-purple-600">Fastest Lap</span>
           <span className="font-mono font-bold text-sm text-purple-700">{fastest_lap.time}</span>
-          <span className="text-caption-1 text-purple-500">{fastest_lap.code} — Lap {fastest_lap.lap || '?'}</span>
+          <span className="text-caption-1 text-purple-500">{fastest_lap.code}{fastest_lap.lap ? ` — Lap ${fastest_lap.lap}` : ''}</span>
         </div>
       )}
     </section>

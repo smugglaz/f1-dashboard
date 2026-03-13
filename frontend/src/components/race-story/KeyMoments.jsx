@@ -24,10 +24,10 @@ export default function KeyMoments({ raceControl, weather }) {
     if (cat === 'VSC' || flag === 'VSC') return true
     // Red flags
     if (flag === 'RED') return true
-    // Race start/restart
-    if (msg.includes('GREEN LIGHT') || msg.includes('RACE START')) return true
-    // Rain onset
-    if (msg.includes('RAIN') || msg.includes('WET')) return true
+    // Race start only (not pit exit open)
+    if ((msg.includes('GREEN LIGHT') || msg.includes('RACE START')) && !msg.includes('PIT EXIT')) return true
+    // Rain onset (exclude 0% risk)
+    if ((msg.includes('RAIN') || msg.includes('WET')) && !msg.includes('0%')) return true
     // DRS enabled/disabled (strategy impact)
     if (msg.includes('DRS ENABLED') || msg.includes('DRS DISABLED')) return true
     // Ignore everything else (sector yellows, green flags, double yellows, clears)

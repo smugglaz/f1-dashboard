@@ -30,12 +30,14 @@ export default function WinnerInsight({ summary, stints, sectors, pitStops, tyre
     }
 
     // ── Margin story ──
-    if (margin) {
-      if (typeof margin === 'string' && margin.includes('lap')) {
-        fragments.push(`winning by ${margin}`)
-        details.push({ label: 'Dominance', value: `Won by ${margin}`, color: '#34C759' })
+    // Use second?.time (the gap to P2, e.g. "+2.974") instead of margin (winner's total race time)
+    const gap = second?.time || margin
+    if (gap) {
+      if (typeof gap === 'string' && gap.includes('lap')) {
+        fragments.push(`winning by ${gap}`)
+        details.push({ label: 'Dominance', value: `Won by ${gap}`, color: '#34C759' })
       } else {
-        const secs = parseFloat(margin)
+        const secs = parseFloat(String(gap).replace('+', ''))
         if (!isNaN(secs)) {
           if (secs > 25) {
             fragments.push('in a commanding display')
@@ -132,7 +134,8 @@ export default function WinnerInsight({ summary, stints, sectors, pitStops, tyre
     // ── Pit crew execution ──
     const allStops = pitStops?.pit_stops || pitStops?.stops || []
     if (allStops.length > 0) {
-      const winnerPits = allStops.filter(p => p.driver_code === winner.code)
+      const driverCode = (p) => p.driver_code || p.driver?.code || ''
+      const winnerPits = allStops.filter(p => driverCode(p) === winner.code)
       if (winnerPits.length > 0) {
         const durations = winnerPits.map(p => parseFloat(p.duration)).filter(d => !isNaN(d) && d > 0)
         const avg = durations.length ? durations.reduce((a, b) => a + b, 0) / durations.length : 0
@@ -183,7 +186,7 @@ export default function WinnerInsight({ summary, stints, sectors, pitStops, tyre
         <div>
           <div className="text-title-1 font-semibold">{winner.name}</div>
           <div className="text-footnote text-label-secondary mt-0.5">
-            {getTeamName(winner)} — {second ? `${margin || second.time} ahead of ${second.code}` : 'Race Winner'}
+            {getTeamName(winner)} — {second?.time ? `${second.time} ahead of ${second.code}` : 'Race Winner'}
           </div>
           <p className="text-body text-label-secondary mt-2">
             {analysis.narrative}

@@ -209,7 +209,7 @@ export default function History() {
             const winnerColor = winnerTeam ? getTeamColor(winnerTeam) : null
             const scCount = sum?.safety_cars || 0
             const isWet = sum?.weather?.rain
-            const marginVal = sum?.margin
+            const marginVal = sum?.second?.time
 
             return (
               <Card key={r.round} className="group relative overflow-hidden">

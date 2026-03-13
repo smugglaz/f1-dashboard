@@ -47,13 +47,14 @@ const DRIVER_TEAM_MAP = {
  * Returns the hex color or a neutral gray fallback.
  */
 export function getTeamColor(teamName) {
-  if (!teamName || typeof teamName !== 'string') return '#555555'
+  if (!teamName) return '#555555'
+  const name = typeof teamName === 'string' ? teamName : String(teamName)
   // Direct match
-  if (TEAMS[teamName]) return TEAMS[teamName].color
+  if (TEAMS[name]) return TEAMS[name].color
   // Case-insensitive partial match
-  const lower = teamName.toLowerCase()
-  for (const [name, info] of Object.entries(TEAMS)) {
-    if (name.toLowerCase().includes(lower) || lower.includes(name.toLowerCase())) {
+  const lower = name.toLowerCase()
+  for (const [key, info] of Object.entries(TEAMS)) {
+    if (key.toLowerCase().includes(lower) || lower.includes(key.toLowerCase())) {
       return info.color
     }
   }
