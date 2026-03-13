@@ -1,4 +1,4 @@
-import { getTeamColor } from '@/utils/teams'
+import { getTeamColor, getTeamName } from '@/utils/teams'
 import { getPositionColor } from '@/utils/colors'
 
 export default function StartingGrid({ qualifying }) {
@@ -20,7 +20,7 @@ export default function StartingGrid({ qualifying }) {
       {rows.map((pair, ri) => (
         <div key={ri} className="flex justify-center gap-3">
           {pair.map((driver, di) => {
-            const teamColor = getTeamColor(driver.constructor || '')
+            const teamColor = getTeamColor(getTeamName(driver))
             const pos = driver.position || (ri * 2 + di + 1)
             return (
               <div

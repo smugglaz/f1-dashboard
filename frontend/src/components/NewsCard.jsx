@@ -7,6 +7,13 @@ const SOURCE_COLORS = {
   'motorsport.com': 'bg-green-500/20 text-green-400',
 }
 
+function stripHtml(html) {
+  if (!html) return ''
+  return html.replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'").replace(/\s+/g, ' ').trim()
+}
+
 export default function NewsCard({ article }) {
   const sourceClass = SOURCE_COLORS[article.source] || 'bg-gray-500/20 text-gray-400'
   const readTime = estimateReadingTime(article.summary)
@@ -47,7 +54,7 @@ export default function NewsCard({ article }) {
           {article.title}
         </h3>
         {article.summary && (
-          <p className="text-label-secondary text-xs mt-2 line-clamp-3">{article.summary}</p>
+          <p className="text-label-secondary text-xs mt-2 line-clamp-3">{stripHtml(article.summary)}</p>
         )}
         <div className="flex items-center gap-1 text-label-tertiary text-xs mt-3">
           <ExternalLink className="w-3 h-3" />

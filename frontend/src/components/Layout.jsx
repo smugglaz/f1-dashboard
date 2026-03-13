@@ -126,7 +126,7 @@ export default function Layout({ children }) {
         </div>
 
         {/* Page content with Apple-style margins */}
-        <div className="max-w-7xl mx-auto px-8 py-6">{children}</div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-6">{children}</div>
       </main>
     </div>
   )

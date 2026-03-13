@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useApi } from '../hooks/useApi'
 import Plot from 'react-plotly.js'
-import { getTeamColor } from '../utils/teams'
+import { getTeamColor, getTeamName } from '../utils/teams'
 import { getPositionColor } from '../utils/colors'
 import { formatDriverName } from '../utils/format'
 
@@ -35,7 +35,7 @@ export default function Predictions() {
         <EmptyState
           icon={Sparkles}
           title="Predictions Unavailable"
-          description={error || 'The prediction model needs historical data to generate forecasts. Check back after data sync completes.'}
+          description={error || 'The ML model requires synced historical data (race results, qualifying, and driver performance) to generate predictions. Go to Race Story and sync at least 1 recent season, then predictions will appear for the next upcoming race.'}
         />
       </div>
     )
@@ -47,7 +47,7 @@ export default function Predictions() {
 
   const barColors = top10.map(d => {
     if (d.team_color) return d.team_color
-    return getTeamColor(d.constructor || '')
+    return getTeamColor(getTeamName(d))
   }).reverse()
 
   return (
@@ -168,7 +168,7 @@ export default function Predictions() {
                 {sorted.map((d, i) => {
                   const rank = i + 1
                   const posColor = getPositionColor(rank)
-                  const teamColor = d.team_color || getTeamColor(d.constructor || '')
+                  const teamColor = d.team_color || getTeamColor(getTeamName(d))
                   const code = d.driver_code || d.driver || ''
                   const fullName = d.driver_name || ''
 
@@ -199,7 +199,7 @@ export default function Predictions() {
                       <td className="py-2 px-3">
                         <div className="flex items-center gap-2">
                           <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: teamColor }} />
-                          <span className="text-xs text-label-tertiary">{d.constructor || '-'}</span>
+                          <span className="text-xs text-label-tertiary">{getTeamName(d) || '-'}</span>
                         </div>
                       </td>
                       <td className="py-2 px-3 text-right font-mono font-semibold">

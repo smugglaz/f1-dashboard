@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { getTeamColor } from '@/utils/teams'
+import { getTeamColor, getTeamName } from '@/utils/teams'
 import { ChevronRight } from 'lucide-react'
 
 function Wrapper({ to, children, className }) {
@@ -35,7 +35,7 @@ export default function RaceTimeline({ races, year }) {
     <div className="flex items-stretch gap-2">
       {items.map((item, i) => {
         const r = item.race
-        const teamColor = r.winner ? getTeamColor(r.winner.constructor || '') : null
+        const teamColor = r.winner ? getTeamColor(getTeamName(r.winner)) : null
         const isNext = item.type === 'next'
 
         return (

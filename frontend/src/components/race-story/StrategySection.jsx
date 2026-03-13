@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { getTireColor } from '@/utils/colors'
-import { getTeamColor } from '@/utils/teams'
+import { getTeamColor, getTeamName } from '@/utils/teams'
 
 /**
  * Strategy section — shows stint timeline inline (no wrapping existing component
@@ -65,7 +65,7 @@ export default function StrategySection({ stints }) {
           {/* Driver stint bars */}
           <div className="space-y-1">
             {stints.drivers.map((driver) => {
-              const teamColor = getTeamColor(driver.constructor || '')
+              const teamColor = getTeamColor(getTeamName(driver))
               return (
                 <div key={driver.code} className="flex items-center gap-2">
                   <div className="w-16 flex items-center gap-1 shrink-0">

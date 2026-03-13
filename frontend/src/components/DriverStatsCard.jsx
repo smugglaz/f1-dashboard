@@ -1,5 +1,5 @@
 import { useApi } from '../hooks/useApi'
-import { getTeamColor } from '../utils/teams'
+import { getTeamColor, getTeamName } from '../utils/teams'
 import LoadingSpinner from './LoadingSpinner'
 
 function Stat({ label, value, highlight = false }) {
@@ -23,7 +23,7 @@ export default function DriverStatsCard({ year, driverId }) {
   if (!data?.stats) return <p className="text-sm text-label-tertiary text-center py-2">No data</p>
 
   const s = data.stats
-  const teamColor = getTeamColor(data.constructor || '')
+  const teamColor = getTeamColor(getTeamName(data))
 
   return (
     <div className="space-y-3">
@@ -31,7 +31,7 @@ export default function DriverStatsCard({ year, driverId }) {
         <div className="w-1 h-6 rounded" style={{ backgroundColor: teamColor }} />
         <span className="font-semibold text-sm">{data.driver.code}</span>
         <span className="text-label-tertiary text-sm">{data.driver.name}</span>
-        <span className="text-xs text-label-tertiary ml-auto">{data.constructor}</span>
+        <span className="text-xs text-label-tertiary ml-auto">{getTeamName(data)}</span>
       </div>
 
       <div className="grid grid-cols-2 gap-3">

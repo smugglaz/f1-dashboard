@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import Plot from 'react-plotly.js'
 import { useApi } from '../hooks/useApi'
-import { getTeamColor } from '../utils/teams'
+import { getTeamColor, getTeamName } from '../utils/teams'
 import LoadingSpinner from './LoadingSpinner'
 
 export default function PointsProgression({ year }) {
@@ -25,7 +25,7 @@ export default function PointsProgression({ year }) {
 
     const driverConstructor = {}
     for (const d of lastRound.drivers) {
-      driverConstructor[d.code] = d.constructor
+      driverConstructor[d.code] = getTeamName(d)
     }
 
     const t = topDrivers.map(code => {

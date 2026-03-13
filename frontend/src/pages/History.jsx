@@ -7,7 +7,7 @@ import {
   qualTimeToMs, formatPercentDelta,
 } from '../utils/format'
 import { getPositionColor } from '../utils/colors'
-import { getTeamColor } from '../utils/teams'
+import { getTeamColor, getTeamName } from '../utils/teams'
 import Plot from 'react-plotly.js'
 import { getPlotlyGlassLayout } from '@/utils/chartTheme'
 
@@ -18,7 +18,7 @@ import { PageHeader } from '@/components/ui/page-header'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
-import { Database, LayoutGrid, Table2, ArrowRight, Trophy, Flag, Calendar } from 'lucide-react'
+import { Database, LayoutGrid, Table2, ArrowRight, Trophy, Flag, Calendar, ShieldAlert, CloudRain, Zap } from 'lucide-react'
 
 import RaceSummaryCard from '@/components/race/RaceSummaryCard'
 import StrategyTimeline from '@/components/race/StrategyTimeline'
@@ -101,6 +101,34 @@ export default function History() {
     }
   }, [racesData, syncing])
 
+  // Pre-fetch race summaries for all past races (drama cues on cards)
+  const [summaries, setSummaries] = useState({})
+  useEffect(() => {
+    if (!races.length || view !== 'overview') return
+    const pastRaces = races.filter(r => r.date && new Date(r.date) < new Date())
+    if (!pastRaces.length) return
+
+    // Fetch all summaries in parallel — fire and forget
+    const fetchAll = async () => {
+      const results = await Promise.allSettled(
+        pastRaces.map(async r => {
+          try {
+            const data = await fetchApi(`/api/historical/race-summary/${year}/${r.round}`)
+            return { round: r.round, data }
+          } catch { return { round: r.round, data: null } }
+        })
+      )
+      const map = {}
+      for (const r of results) {
+        if (r.status === 'fulfilled' && r.value.data) {
+          map[r.value.round] = r.value.data
+        }
+      }
+      setSummaries(map)
+    }
+    fetchAll()
+  }, [races, year, view])
+
   // Reset sprint tabs when switching to non-sprint round
   useEffect(() => {
     if (!hasSprint && (tab === 'sprint' || tab === 'sprint-qualifying')) {
@@ -175,29 +203,56 @@ export default function History() {
           {races.map(r => {
             const isPast = r.date && new Date(r.date) < new Date()
             const raceDate = r.date ? new Date(r.date) : null
+            const sum = summaries[r.round]
+            const winnerName = sum?.winner?.name || sum?.winner?.code
+            const winnerTeam = sum?.winner ? getTeamName(sum.winner) : null
+            const winnerColor = winnerTeam ? getTeamColor(winnerTeam) : null
+            const scCount = sum?.safety_cars || 0
+            const isWet = sum?.weather?.rain
+            const marginVal = sum?.margin
+
             return (
               <Card key={r.round} className="group relative overflow-hidden">
+                {/* Team color accent bar for winner */}
+                {winnerColor && (
+                  <div className="h-0.5 w-full" style={{ backgroundColor: winnerColor }} />
+                )}
                 <CardContent className="p-4 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-caption-2 uppercase tracking-wider text-label-tertiary">
                       Round {r.round}
                     </span>
-                    {r.has_sprint && (
-                      <Badge variant="outline" className="text-[9px] border-orange-500/30 text-orange-500">
-                        Sprint
-                      </Badge>
-                    )}
+                    <div className="flex items-center gap-1">
+                      {r.has_sprint && (
+                        <Badge variant="outline" className="text-[9px] border-orange-500/30 text-orange-500">
+                          Sprint
+                        </Badge>
+                      )}
+                      {isWet && <CloudRain className="h-3 w-3 text-blue-400" title="Wet race" />}
+                      {scCount > 0 && <ShieldAlert className="h-3 w-3 text-amber-500" title={`${scCount} safety car${scCount > 1 ? 's' : ''}`} />}
+                    </div>
                   </div>
                   <h3 className="text-headline font-semibold leading-tight">{r.name}</h3>
                   {r.circuit?.name && (
                     <p className="text-caption-1 text-label-secondary">{r.circuit.name}</p>
                   )}
-                  {raceDate && (
+
+                  {/* Winner + drama line */}
+                  {winnerName ? (
+                    <div className="flex items-center gap-2 text-xs">
+                      <Trophy className="h-3 w-3 text-f1-gold shrink-0" />
+                      <span className="font-semibold font-mono">{winnerName}</span>
+                      {marginVal && (
+                        <span className="text-label-tertiary">+{marginVal}</span>
+                      )}
+                    </div>
+                  ) : raceDate ? (
                     <div className="flex items-center gap-1.5 text-caption-1 text-label-tertiary">
                       <Calendar className="h-3 w-3" />
                       {raceDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </div>
-                  )}
+                  ) : null}
+
                   <div className="flex items-center gap-2 pt-1">
                     {isPast ? (
                       <Link
@@ -215,7 +270,7 @@ export default function History() {
                         onClick={() => { setRound(r.round); setView('detail') }}
                         className="text-caption-1 text-label-tertiary hover:text-label-primary transition-colors ml-auto"
                       >
-                        Detailed Analysis
+                        Detail
                       </button>
                     )}
                   </div>
@@ -397,7 +452,7 @@ function ResultsTable({ results }) {
             const posColor = getPositionColor(pos)
             const code = r.driver?.code || '-'
             const fullName = r.driver?.name || ''
-            const constructor = r.constructor || '-'
+            const constructor = getTeamName(r) || '-'
             const teamColor = getTeamColor(constructor)
             const posChange = formatPositionChange(r.grid, pos)
             const status = formatStatus(r.status, pos)
@@ -560,7 +615,7 @@ function QualifyingTable({ results, qualFormat = 'KNOCKOUT' }) {
             const posColor = getPositionColor(pos)
             const code = r.driver?.code || '-'
             const fullName = r.driver?.name || ''
-            const constructor = r.constructor || '-'
+            const constructor = getTeamName(r) || '-'
             const teamColor = getTeamColor(constructor)
             const eliminatedQ1 = showQ2Q3 && pos >= 16
             const eliminatedQ2 = showQ2Q3 && pos >= 11 && pos <= 15
@@ -665,7 +720,7 @@ function SprintResultsTable({ results }) {
             const posColor = getPositionColor(pos)
             const code = r.driver?.code || '-'
             const fullName = r.driver?.name || ''
-            const constructor = r.constructor || '-'
+            const constructor = getTeamName(r) || '-'
             const teamColor = getTeamColor(constructor)
             const status = formatStatus(r.status, pos)
             const isDNF = status.label === 'DNF' || status.label === 'DSQ' || status.label === 'DNS'
@@ -763,7 +818,7 @@ function SprintShootoutTable({ results }) {
             const posColor = getPositionColor(pos)
             const code = r.driver?.code || '-'
             const fullName = r.driver?.name || ''
-            const constructor = r.constructor || '-'
+            const constructor = getTeamName(r) || '-'
             const teamColor = getTeamColor(constructor)
             const eliminatedSQ1 = hasSQ3 && pos >= 13
             const eliminatedSQ2 = hasSQ3 && pos >= 9 && pos <= 12
@@ -886,7 +941,7 @@ function PitStopsTable({ stops }) {
           {sorted.map((s, i) => {
             const code = s.driver?.code || s._driver_code || '-'
             const fullName = s.driver?.name || ''
-            const constructor = s.constructor || s._constructor || '-'
+            const constructor = getTeamName(s) || s._constructor || '-'
             const teamColor = getTeamColor(constructor)
             const pit = formatPitDuration(s.duration)
             const barWidth = maxDuration > 0 ? (parseFloat(s.duration) / maxDuration) * 100 : 0
@@ -942,7 +997,7 @@ function PositionChart({ laps }) {
     for (const lap of laps) {
       for (const d of (lap.drivers || [])) {
         if (!drivers[d.code]) {
-          drivers[d.code] = { code: d.code, constructor: d.constructor || '', x: [], y: [] }
+          drivers[d.code] = { code: d.code, constructor: getTeamName(d), x: [], y: [] }
         }
         drivers[d.code].x.push(lap.lap)
         drivers[d.code].y.push(d.position)

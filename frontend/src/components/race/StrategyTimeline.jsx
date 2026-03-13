@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { TyreBadge } from '@/components/ui/tyre-badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getTireColor } from '@/utils/colors'
-import { getTeamColor } from '@/utils/teams'
+import { getTeamColor, getTeamName } from '@/utils/teams'
 import { Layers } from 'lucide-react'
 
 export default function StrategyTimeline({ year, round }) {
@@ -62,7 +62,7 @@ export default function StrategyTimeline({ year, round }) {
         {/* Driver bars */}
         <div className="space-y-1">
           {data.drivers.map((driver) => {
-            const teamColor = getTeamColor(driver.constructor || '')
+            const teamColor = getTeamColor(getTeamName(driver))
             return (
               <div key={driver.code} className="flex items-center gap-2">
                 {/* Driver code + position */}

@@ -11,7 +11,13 @@ const SECTIONS = [
 export default function StoryNav() {
   const [active, setActive] = useState('stage')
 
+  const [visibleSections, setVisibleSections] = useState(SECTIONS.map(s => s.id))
+
   useEffect(() => {
+    // Only show dots for sections that actually exist in the DOM
+    const existing = SECTIONS.filter(s => document.getElementById(s.id)).map(s => s.id)
+    setVisibleSections(existing)
+
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
@@ -37,7 +43,7 @@ export default function StoryNav() {
 
   return (
     <nav className="fixed right-6 top-1/2 -translate-y-1/2 z-40 hidden xl:flex flex-col items-end gap-3">
-      {SECTIONS.map(s => (
+      {SECTIONS.filter(s => visibleSections.includes(s.id)).map(s => (
         <button
           key={s.id}
           onClick={() => scrollTo(s.id)}

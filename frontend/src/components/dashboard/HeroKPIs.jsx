@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { Trophy, Flag, Users, Calendar } from 'lucide-react'
 import { KpiCard } from '@/components/ui/kpi-card'
-import { getTeamColor } from '@/utils/teams'
+import { getTeamColor, getTeamName } from '@/utils/teams'
 import { formatCountdown } from '@/utils/format'
 
 export default function HeroKPIs({ driverStandings, constructorStandings, races, year }) {
@@ -52,7 +52,7 @@ export default function HeroKPIs({ driverStandings, constructorStandings, races,
         title="Most Wins"
         value={stats.winsLeader ? `${stats.winsLeader.wins}` : '0'}
         delta={stats.winsLeader?.driver?.code}
-        deltaLabel={stats.winsLeader?.constructor || ''}
+        deltaLabel={getTeamName(stats.winsLeader)}
         trend="up"
         icon={Flag}
       />

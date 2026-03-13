@@ -13,12 +13,25 @@ const FLAG_CONFIG = {
 export default function KeyMoments({ raceControl, weather }) {
   if (!raceControl?.messages?.length) return null
 
-  // Filter to significant events only
+  // Filter to race-defining moments only: SC, VSC, red flags, rain
   const significant = raceControl.messages.filter(m => {
     const flag = m.flag?.toUpperCase() || ''
     const cat = m.category?.toUpperCase() || ''
-    return flag === 'RED' || cat === 'SAFETYCAR' || cat === 'VSC' ||
-           cat === 'FLAG' || (flag && flag !== 'GREEN' && flag !== 'CLEAR')
+    const msg = m.message?.toUpperCase() || ''
+    // Safety Car deployments
+    if (cat === 'SAFETYCAR' || flag === 'SC') return true
+    // Virtual Safety Car
+    if (cat === 'VSC' || flag === 'VSC') return true
+    // Red flags
+    if (flag === 'RED') return true
+    // Race start/restart
+    if (msg.includes('GREEN LIGHT') || msg.includes('RACE START')) return true
+    // Rain onset
+    if (msg.includes('RAIN') || msg.includes('WET')) return true
+    // DRS enabled/disabled (strategy impact)
+    if (msg.includes('DRS ENABLED') || msg.includes('DRS DISABLED')) return true
+    // Ignore everything else (sector yellows, green flags, double yellows, clears)
+    return false
   })
 
   if (!significant.length) {

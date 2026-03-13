@@ -3,7 +3,7 @@ import { useApi } from '@/hooks/useApi'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { getTeamColor } from '@/utils/teams'
+import { getTeamColor, getTeamName } from '@/utils/teams'
 import { Flag, AlertTriangle, CloudRain, Zap, ArrowRight } from 'lucide-react'
 
 export default function RecentRaceSummary({ year, round }) {
@@ -27,7 +27,7 @@ export default function RecentRaceSummary({ year, round }) {
   if (!data?.winner) return null
 
   const { race, winner, margin, second, fastest_lap, safety_cars, virtual_safety_cars, red_flags, dnfs, total_pit_stops, weather } = data
-  const teamColor = getTeamColor(winner.constructor || '')
+  const teamColor = getTeamColor(getTeamName(winner))
 
   return (
     <Card>
@@ -49,7 +49,7 @@ export default function RecentRaceSummary({ year, round }) {
             <div>
               <div className="text-title-2">{winner.name}</div>
               <div className="text-footnote">
-                {winner.constructor} &middot; from P{winner.grid}
+                {getTeamName(winner)} &middot; from P{winner.grid}
               </div>
             </div>
           </div>

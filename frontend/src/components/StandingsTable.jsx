@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { getPositionColor } from '../utils/colors'
-import { getTeamColor } from '../utils/teams'
+import { getTeamColor, getTeamName } from '../utils/teams'
 import { formatDriverName } from '../utils/format'
 import { GapBar } from '@/components/ui/gap-bar'
 
@@ -66,7 +66,7 @@ export default function StandingsTable({ data = [], type = 'driver' }) {
           {sorted.map((row, i) => {
             const pos = getVal(row, 'position')
             const posColor = getPositionColor(pos)
-            const teamName = type === 'driver' ? (row.constructor || '') : (getVal(row, 'constructor.name') || '')
+            const teamName = type === 'driver' ? getTeamName(row) : (getVal(row, 'constructor.name') || '')
             const teamColor = getTeamColor(teamName)
 
             return (
@@ -105,7 +105,7 @@ export default function StandingsTable({ data = [], type = 'driver' }) {
                   }
 
                   if (c.key === 'constructor' || c.key === 'constructor.name') {
-                    const name = type === 'driver' ? row.constructor : getVal(row, 'constructor.name')
+                    const name = type === 'driver' ? getTeamName(row) : getVal(row, 'constructor.name')
                     return (
                       <td key={c.key} className="py-3 px-3">
                         <div className="flex items-center gap-2">

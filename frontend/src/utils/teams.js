@@ -47,7 +47,7 @@ const DRIVER_TEAM_MAP = {
  * Returns the hex color or a neutral gray fallback.
  */
 export function getTeamColor(teamName) {
-  if (!teamName) return '#555555'
+  if (!teamName || typeof teamName !== 'string') return '#555555'
   // Direct match
   if (TEAMS[teamName]) return TEAMS[teamName].color
   // Case-insensitive partial match
@@ -78,6 +78,25 @@ export function getTeamByDriver(driverCode) {
  */
 export function getDriverColor(driverCode) {
   return getTeamByDriver(driverCode).color
+}
+
+/**
+ * Safely get the team/constructor name from an API object.
+ * The word "constructor" is a reserved JS property (Object.constructor),
+ * so obj.constructor returns the Object function when not an own property.
+ * This helper checks hasOwnProperty first.
+ */
+export function getTeamName(obj) {
+  if (!obj) return ''
+  if (Object.hasOwn(obj, 'constructor') && typeof obj.constructor === 'string') {
+    return obj.constructor
+  }
+  // Fallback: try looking up by driver code
+  if (obj.code) {
+    const team = DRIVER_TEAM_MAP[obj.code.toUpperCase()]
+    if (team) return team
+  }
+  return ''
 }
 
 /**

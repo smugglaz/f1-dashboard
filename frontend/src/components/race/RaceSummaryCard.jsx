@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { StatRow } from '@/components/ui/stat-row'
-import { getTeamColor } from '@/utils/teams'
+import { getTeamColor, getTeamName } from '@/utils/teams'
 import { Trophy, MapPin, Thermometer } from 'lucide-react'
 
 export default function RaceSummaryCard({ year, round }) {
@@ -33,7 +33,7 @@ export default function RaceSummaryCard({ year, round }) {
 
   const { race, winner, margin, second, fastest_lap, safety_cars, virtual_safety_cars, red_flags, dnfs, total_pit_stops, weather } = summary
   const circuit = circuitData?.circuit
-  const teamColor = getTeamColor(winner.constructor || '')
+  const teamColor = getTeamColor(getTeamName(winner))
 
   return (
     <Card className="relative overflow-hidden">
@@ -58,7 +58,7 @@ export default function RaceSummaryCard({ year, round }) {
               <div className="w-1.5 h-10 rounded-full" style={{ backgroundColor: teamColor }} />
               <div>
                 <div className="text-lg font-bold">{winner.name}</div>
-                <div className="text-sm text-label-tertiary">{winner.constructor} &middot; from P{winner.grid}</div>
+                <div className="text-sm text-label-tertiary">{getTeamName(winner)} &middot; from P{winner.grid}</div>
               </div>
             </div>
             {second && (

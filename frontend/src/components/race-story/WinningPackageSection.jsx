@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
-import { getTeamColor } from '@/utils/teams'
+import { getTeamColor, getTeamName } from '@/utils/teams'
 import WinnerInsight from './WinnerInsight'
 
 export default function WinningPackageSection({ summary, sectors, tyrePerf, pitStops, stints }) {
@@ -43,8 +43,8 @@ export default function WinningPackageSection({ summary, sectors, tyrePerf, pitS
     }
   }, [pitStops, winner, second])
 
-  const winnerTeamColor = getTeamColor(winner.constructor || '')
-  const secondTeamColor = second ? getTeamColor(second.constructor || '') : '#888'
+  const winnerTeamColor = getTeamColor(getTeamName(winner))
+  const secondTeamColor = second ? getTeamColor(getTeamName(second)) : '#888'
 
   return (
     <section id="package" className="scroll-mt-8 space-y-6">
@@ -58,7 +58,7 @@ export default function WinningPackageSection({ summary, sectors, tyrePerf, pitS
       {/* Winner insight narrative */}
       <Card>
         <CardContent className="p-5">
-          <WinnerInsight summary={summary} stints={stints} sectors={sectors} />
+          <WinnerInsight summary={summary} stints={stints} sectors={sectors} pitStops={pitStops} tyrePerf={tyrePerf} />
         </CardContent>
       </Card>
 

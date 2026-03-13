@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { ChevronDown, ChevronUp } from 'lucide-react'
-import { getTeamColor } from '@/utils/teams'
+import { getTeamColor, getTeamName } from '@/utils/teams'
 import { getPositionColor } from '@/utils/colors'
 import { formatDriverName } from '@/utils/format'
 
@@ -10,7 +10,7 @@ export default function NumbersSection({ race, qualifying, pitStops }) {
 
   const results = race?.results || race?.race?.results || []
   const qualResults = qualifying?.results || qualifying || []
-  const pits = pitStops?.pit_stops || []
+  const pits = pitStops?.pit_stops || pitStops?.stops || []
 
   const hasData = results.length > 0 || qualResults.length > 0 || pits.length > 0
 
@@ -50,7 +50,7 @@ export default function NumbersSection({ race, qualifying, pitStops }) {
                     </thead>
                     <tbody>
                       {results.map((r, i) => {
-                        const teamColor = getTeamColor(r.constructor || '')
+                        const teamColor = getTeamColor(getTeamName(r))
                         const posColor = getPositionColor(r.position)
                         return (
                           <tr key={i} className="border-b border-glass-border/50 hover:bg-black/[0.03]">
@@ -68,7 +68,7 @@ export default function NumbersSection({ race, qualifying, pitStops }) {
                                 <span className="font-bold font-mono">{r.code || r.driver?.code || '-'}</span>
                               </div>
                             </td>
-                            <td className="py-2 px-2 text-label-secondary">{r.constructor || '-'}</td>
+                            <td className="py-2 px-2 text-label-secondary">{getTeamName(r) || '-'}</td>
                             <td className="py-2 px-2 font-mono text-label-secondary">{r.grid || '-'}</td>
                             <td className="py-2 px-2 text-right font-mono">
                               {r.time || r.status || '-'}
@@ -102,7 +102,7 @@ export default function NumbersSection({ race, qualifying, pitStops }) {
                     </thead>
                     <tbody>
                       {qualResults.map((q, i) => {
-                        const teamColor = getTeamColor(q.constructor || '')
+                        const teamColor = getTeamColor(getTeamName(q))
                         return (
                           <tr key={i} className="border-b border-glass-border/50 hover:bg-black/[0.03]">
                             <td className="py-2 px-2 font-mono font-bold">{q.position || i + 1}</td>
